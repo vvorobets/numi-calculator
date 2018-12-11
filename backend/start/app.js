@@ -5,7 +5,7 @@
 | Providers
 |--------------------------------------------------------------------------
 |
-| Providers are building blocks for your Adonis app. Anytime you install
+| Providers are building blocks for your Adonis rrae. Anytime you install
 | a new Adonis specific package, chances are you will register the
 | provider here.
 |
@@ -18,7 +18,8 @@ const providers = [
   '@adonisjs/cors/providers/CorsProvider',
   '@adonisjs/shield/providers/ShieldProvider',
   '@adonisjs/session/providers/SessionProvider',
-  '@adonisjs/auth/providers/AuthProvider'
+  '@adonisjs/auth/providers/AuthProvider',
+  '@adonisjs/validator/providers/ValidatorProvider'
 ]
 
 /*
