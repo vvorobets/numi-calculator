@@ -35,13 +35,13 @@ class RegisterForm extends Component {
             errors.email = "Incorrect email format";
         }
         if (this.state.password.length <= 7) {
-            errors.password = "Too short password";
+            errors.password = "Password must be at least 8 symbols long";
         }
         if (!re2.test(String(this.state.username).toLowerCase())) {
-            errors.username = "Incorrect username format";
+            errors.username = "Username must contain only letters";
         } 
         if (this.state.password !== this.state.confirmPassword) {
-            errors.confirmPassword = "Confirm password incorrect";
+            errors.confirmPassword = "Confirm password is incorrect";
         }
         if(Object.keys(errors).length) {
             this.setState({ errors })
