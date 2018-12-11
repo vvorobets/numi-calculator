@@ -29,6 +29,11 @@ html {
   text-align: center;
 }
 
+.user-form__info-text {
+  text-align: center;
+  word-break: break-all;
+}
+
 .user-form__input {
   width: 50%;
   height: 2rem;
@@ -50,6 +55,8 @@ html {
 }
 
 .fetch-spinner {
-  margin: 10vh 25vw 0;
+  margin: 10vh 25vw;
+  height: 40vh;
+  width: 40vw;
   background-color: lightgrey;
 }

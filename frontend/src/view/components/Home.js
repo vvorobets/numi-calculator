@@ -28,6 +28,7 @@ class Home extends Component {
                 <h3 className="user-form__header">Welcome, {this.props.user.username}!</h3><br />
                 <p>This is the very Home component</p><br />
                 <p>Your email is: <strong>{this.props.user.email}</strong></p><br />
+                <p className="user-form__info-text">Your precious token is: <strong>{this.props.user.token}</strong></p><br />
                 <button onClick={this.handleLogout} className="user-form__submit-button">Log Out</button>
             </div>
         )

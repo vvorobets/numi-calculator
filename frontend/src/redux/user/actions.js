@@ -3,7 +3,7 @@ import { USER } from './types';
 export const userSignup = (user) => dispatch => {
     dispatch({ type: USER.SIGNUP});
 
-    return fetch('http://localhost:3001/api/register', {
+    return fetch('http://localhost:3333/registration', {
         method: "POST",
         mode: "cors",
         headers: {
@@ -36,7 +36,7 @@ export const userSignup = (user) => dispatch => {
 export const userLogin = (user) => dispatch => {
     dispatch({ type: USER.LOGIN });
 
-    return fetch('http://localhost:3001/api/login', {
+    return fetch('http://localhost:3333/login', {
         method: "POST",
         mode: "cors",
         headers: {
@@ -45,11 +45,17 @@ export const userLogin = (user) => dispatch => {
         body: JSON.stringify(user),
     })
         .then(response => response.json())
-        .then(json => { 
+        .then(json => {
+console.log('login json', json);
             if (json.type === 'error') {
                 dispatch({ 
                     type: USER.LOGIN_ERROR,
                     message: json.message
+                });
+            } else if (json[0]) { // need to be refactored with proper response messaging from server
+                dispatch({ 
+                    type: USER.LOGIN_ERROR,
+                    message: json[0].message
                 });
             } else {
                 dispatch({ 
@@ -69,5 +75,22 @@ export const userLogin = (user) => dispatch => {
 
 export const userLogout = () => dispatch => {
     dispatch({ type: USER.LOGOUT });
-};
 
+    return fetch('http://localhost:3333/logout', {
+        method: "GET",
+        mode: "cors"
+     })
+        .then(response => response.json())
+        .then(json => { 
+            if (json.type === 'error') {
+                console.error(json.message);
+             } else if (json[0]) {
+                console.error(json[0].message);
+            } else {
+                console.log(json); 
+            };
+        })            
+        .catch(error => {
+            console.error(error.message);
+        });
+};

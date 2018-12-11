@@ -5,6 +5,8 @@ import { Link, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { userLogin } from '../../redux/user/actions';
 
+import FetchSpinner from './FetchSpinner';
+
 class LoginForm extends Component {
 	constructor(props) {
 		super(props);
@@ -37,9 +39,7 @@ class LoginForm extends Component {
 
         if (this.props.user.fetchingStatus === 'suspended') {
             return (
-                <div className='fetch-spinner'>
-                    Some nice spinner will be here.
-                </div>
+                <FetchSpinner />
             )
         }
         
@@ -67,7 +67,7 @@ class LoginForm extends Component {
 				{this.props.loginStatus === 'failed' && (
 					<span className="user-form__tip--error">Username or password is incorrect</span>
 				)}
-                <p className="user-form__tip--error">{ this.props.user.errorMessage }</p>
+                <p className="user-form__tip--error">{ this.props.user.loginErrorMessage }</p>
                 <button onClick={this.handleSubmit} className="user-form__submit-button">Sign In</button>
                 <br />
                 <span>Not registered yet? </span><Link to="register">Create an account</Link>
