@@ -13,7 +13,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 
-import './index.css';
+import './css/index.css';
 import Router from './Router';
 import FetchSpinner from './view/components/FetchSpinner';
 import * as serviceWorker from './serviceWorker';

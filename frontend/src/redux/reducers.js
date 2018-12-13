@@ -3,6 +3,7 @@ import storage from 'redux-persist/lib/storage';
 import { persistReducer } from 'redux-persist';
 
 import user from './user/reducers';
+import calculator from './calculator/reducers';
 
 const rootPersistConfig = {
   key: 'root',
@@ -10,14 +11,21 @@ const rootPersistConfig = {
   blacklist: []
 };
 
-const authPersistConfig = {
-  key: 'auth',
+const userPersistConfig = {
+  key: 'user',
+  storage: storage,
+  blacklist: []
+};
+
+const calcPersistConfig = {
+  key: 'calc',
   storage: storage,
   blacklist: []
 };
 
 const rootReducer = combineReducers({
-  user: persistReducer(authPersistConfig, user)
+  user: persistReducer(userPersistConfig, user),
+  calculator: persistReducer(calcPersistConfig, calculator)
 });
 
 export default persistReducer(rootPersistConfig, rootReducer);

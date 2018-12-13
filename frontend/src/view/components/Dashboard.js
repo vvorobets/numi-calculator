@@ -1,0 +1,64 @@
+import React, { Component } from 'react';
+import { Switch, Route, Link, Redirect } from 'react-router-dom';
+
+// redux
+import { connect } from 'react-redux';
+import { userLogout } from '../../redux/user/actions';
+
+// React components
+import Quickstart from './Quickstart';
+import Profile from './Profile';
+import Calculator from './calculator/Calculator';
+import Home from './Home';
+
+class Dashboard extends Component {
+    constructor(props) {
+        super(props);
+
+        this.handleLogout = this.handleLogout.bind(this);
+    }
+
+    handleLogout(e) {
+        e.preventDefault();
+        this.props.userLogout();
+    }
+
+    render() {
+        if (!this.props.user.username) {
+            return(
+                <Redirect to='/login' />
+            )
+        }
+        return(
+            <div className="app-container">
+                <div className="user-navbar">
+                    <Link to="/home" className="user-navbar__link" >Home</Link>
+                    <Link to="/quickstart" className="user-navbar__link" >Quickstart</Link>
+                    <Link to="/calculator" className="user-navbar__link" >Calculator</Link>
+                    <Link to="/profile" className="user-navbar__link" >Profile</Link>
+                    <button onClick={this.handleLogout} className="user-form__submit-button user-form__submit-button--logout">Log Out</button>
+                </div>
+                <div className="app-container__main-section">
+                    <h3 className="app-container__header">Welcome, {this.props.user.username}!</h3><br />
+                <Switch>
+                    <Route exact path="/quickstart" component={ Quickstart } />
+                    <Route exact path="/calculator" component={ Calculator } />
+                    <Route exact path="/profile" component={ Profile } />
+                    <Route component={ Home } />
+                </Switch>
+                </div>
+            </div>
+        )
+    }
+}
+
+const mapStateToProps = ({ user }) => ({
+	user
+});
+
+const DashboardConnected = connect(
+	mapStateToProps,
+	{ userLogout }
+)(Dashboard);
+
+export default DashboardConnected;
