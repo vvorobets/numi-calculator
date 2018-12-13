@@ -1,6 +1,7 @@
 import { handleError } from './actions';
 
 export const parseInput = (input) => {
+    input = input.trim();
     let currentCharType = '';
     let parsedExpression = [];
     let currentUnit = '';
@@ -25,12 +26,17 @@ export const parseInput = (input) => {
                     currentUnit = x;
                 }
                 currentCharType = 'letter'; break;
+            case (x===' '):
+                if (currentCharType === 'letter' && /[A-Za-z]/.test(input[i+1])) {
+                    currentUnit = currentUnit.concat(x);
+                } else currentCharType = 'whitespace';
+                break;
             case (x==='='): 
                 handleVariable(input); break;
             case (x===':'):
-                return handleLabel(input);
+                return parseInput(input.slice(i+1));
             case (x==='#'):
-                return input;
+                return 'Header';
             case (x==='"'):
                 return handleQuoteComment(input);
             case (x==='+'):
@@ -47,7 +53,7 @@ export const parseInput = (input) => {
                 } else return handleMultiplying(input);
             case (x==='/'):
                 if (input[i+1] === '/') {
-                    return input;
+                    return 'Line comment';
                 } else if (input[i+1] === '=') {
                     return handleVariable(input);
                 } else return handleDividing(input);
@@ -57,12 +63,20 @@ export const parseInput = (input) => {
                 } else {
                     return 'Dots allowed within float point numbers only';
                 }
+            case (x==='%'): 
+                currentCharType = 'percentsign';
+                return '//TODO Percent accounting'; break;
+            case (x==='$'): 
+                currentCharType = 'dollarsign';
+                return '//TODO Dollar accounting'; break;
             default:
                 console.log('Not found');
         }
     }
     parsedExpression.push(currentUnit);
- console.log('parsedExpressions', parsedExpression);
+    for(let unit of parsedExpression) {
+        console.log(unit, keywordsList.includes(unit))
+    }
     return input.length;
 }
 
@@ -77,7 +91,6 @@ const handleVariable = (input) => {
         handleAdding();
     }
     return 'Variable';
-    // return { type: 'variable', name: variable, value: parseInput(operands[1])};
 }
 
 // handle operations
@@ -105,10 +118,8 @@ const handleDividing = (input) => {
 const handleLabel = (input) => {
     let operands = input.split(':');
     if(operands.length > 2) {
-        console.log('Multiple labeling is unsupported for now'); // as alternative might be just recursively slice next label
-        return;
+        return 'Multiple labeling is unsupported for now'; // as alternative might be just recursively slice next label
     };
-
     return 'Label, ' + parseInput(operands[1]);
 }
 
@@ -116,16 +127,21 @@ const handleQuoteComment = () => {
     return 'QuoteComment';
 }
 
-const keywords = {
-    conversion: ['in', 'into', 'as', 'to'],
-    time: ['time', 'now', 'fromunix'], // time ! +'in'
-    operation: ['+', 'plus', 'and', 'with', '-', 'minus', 'subtract', 'without', 
-    '*', 'times', 'multiplied by', 'mul', '/', 'divide', 'divide by', '%',
-    '^', '&', '|', 'xor', '<<', '>>', 'mod'], 
-    number: ['hex', 'bin', 'oct', '0b', '0o', '0x', 'sci', 'scientific',
-    'k', 'thousand', 'M', 'million', 'billion' // scales
-    ],
-    currency: ['AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 
+const keywordsList = [
+    // conversion
+        'in', 'into', 'as', 'to',
+    // time
+        'time', 'now', 'fromunix', // time ! +'in'
+    // operation
+        'plus', 'and', 'with', 'minus', 'subtract', 'without', 
+        'times', 'multiplied by', 'mul', 'divide', 'divide by', 
+        '^', '&', '|', 'xor', '<<', '>>', 'mod', 
+    // number
+        'hex', 'bin', 'oct', '0b', '0o', '0x', 'sci', 'scientific',
+    // scales
+        'k', 'thousand', 'M', 'million', 'billion', 
+    // currency
+        'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 
         'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD',
         'CAD', 'CDF', 'CHE', 'CHF', 'CHW', 'CLF', 'CLP', 'CNY', 'COP', 'COU', 'CRC', 'CUC', 'CUP', 'CVE', 'CZK', 
         'DJF', 'DKK', 'DOP', 'DZD', 'EGP', 'ERN', 'ETB', 'EUR', 'FJD', 'FKP', 'GBP', 'GEL', 'GHS', 'GIP', 'GMD', 'GNF', 'GTQ', 'GYD', 
@@ -138,11 +154,13 @@ const keywords = {
         'VES', 'VND', 'VUV', 'WST', 'XAF', 'XAG', 'XAU', 'XBA', 'XBB', 'XBC', 'XBD', 'XCD', 'XDR', 'XOF', 'XPD', 'XPF', 'XPT', 'XSU',
         'XTS', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW',
         'AFA', 'DASH', 'ETH', 'VTC', 'XBC', 'XBT', 'BTC', 'XLM', 'XMR', 'XRP', 'ZEC', 'BTU', // crypto currencies
-        '$', 'Euro'// currencies
-    ],
-    constant: ['Pi', 'E' ],
-    function: ['root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor','sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh'],
-    measure: [
+    // currencies
+        '$', 'Euro', 
+    // constant
+        'Pi', 'E',
+    // function
+        'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor','sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
+    // measure
         'px', 'em', 'ppi', // CSS
         'kelvin', 'K','celsius', 'fahrenheit', // temperature
         'meter', 'mil', 'points', 'lines', 'inch', 'hand', 'foot', 'yard', 'rod', 'chain', 'furlong', 'mile', 'cable', 'nautical mile', 'league', // length
@@ -151,15 +169,13 @@ const keywords = {
         'gram', 'tonne', 'carat', 'centner', 'pound', 'stone', 'ounce', // weight
         'radian', 'degree', '°', // angular
         'kibibytes', 'b', 'bits', 'B', 'bytes', // data  
-    ],
-    measurePrefix: [
+    // measurePrefixes
         'kibi', 'Ki','mebi', 'Mi','gibi', 'Gi', // 1024
         'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega', 'kilo', 'hecto', 'deca', 
         'deci', 'centi', 'milli', 'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto', 
         'Y','Z','E','P','T','G','M','k','h','da','d','c','m','μ','n','p','f','a','z','y', // symbols
-    ],
-    general: ['prev', 'sum', 'total', 'average', 'avg' ],
-    format: ['#', '"', '//', ':']
-}
+    // general
+    'prev', 'sum', 'total', 'average', 'avg', 
+]
 
 
