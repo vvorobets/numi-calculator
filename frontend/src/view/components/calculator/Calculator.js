@@ -19,7 +19,7 @@ const Calculator = (props) => {
     });
     
     return (
-        <React.Fragment>
+        <>
         <h3>Calculator App</h3>
         <button 
             className="operation-item__button operation-item__button--delete operation-item__button--clear-all"
@@ -28,8 +28,9 @@ const Calculator = (props) => {
         <div className="calculator-layout">
             { historyArray }
             <OperationInput />
+            <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>
-        </React.Fragment>
+        </>
     )
 }
 

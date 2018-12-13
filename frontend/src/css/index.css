@@ -63,6 +63,7 @@ body {
 }
 
 .user-form__tip--error {
+  text-align: center;
   color: red;
   font-size: .75rem;
   font-weight: bold;

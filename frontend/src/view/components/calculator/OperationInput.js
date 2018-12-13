@@ -2,7 +2,7 @@ import React from 'react';
 
 // redux
 import { connect } from 'react-redux';
-import { updateInput, calculate } from '../../../redux/calculator/actions';
+import { updateInput, calculate, handleError } from '../../../redux/calculator/actions';
 
 const Operation = (props) => {
     const handleInput = (e) => {
@@ -14,7 +14,16 @@ const Operation = (props) => {
     }
 
     const handleCalculate = () => {
+        if(!props.calculator.currentInput.trim().length) {
+            return props.handleError('Cannot operate empty input');
+        }
         return props.calculate(props.calculator.currentInput);
+    }
+
+    const handleOnKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleCalculate();
+        }
     }
 
     return (
@@ -24,6 +33,7 @@ const Operation = (props) => {
                 className="operation-item__button operation-item__button--copy"
             >Paste</button>
             <input
+                onKeyPress={ handleOnKeyPress }
                 onChange={ handleInput }
                 value={ props.calculator.currentInput }
                 placeholder="Input here" 
@@ -43,7 +53,7 @@ const mapStateToProps = ({ calculator }) => ({
 
 const OperationConnected = connect(
     mapStateToProps,
-    { updateInput, calculate }
+    { updateInput, calculate, handleError }
 )(Operation);
 
 export default OperationConnected;

@@ -1,7 +1,7 @@
 import { CALCULATOR } from './types';
 import { USER } from '../user/types'; // one of the options to clear state after logout
 
-const DEFAULT_CALCULATOR_STATE = { currentInput: '', buffer: '', history: [] };
+const DEFAULT_CALCULATOR_STATE = { currentInput: '', buffer: '', history: [], errorMessage: '' };
 
 const calculatorReducer = (state = DEFAULT_CALCULATOR_STATE, action) => {
     switch(action.type) {
@@ -9,6 +9,8 @@ const calculatorReducer = (state = DEFAULT_CALCULATOR_STATE, action) => {
             return { ...state, currentInput: action.input };
         case CALCULATOR.CALCULATE:
             return { ...state, currentInput: '', history: [ ...state.history, action.operation ]};
+        case CALCULATOR.HANDLE_ERROR: 
+            return { ...state, errorMessage: action.error };
         case CALCULATOR.DELETE_ONE:
             return { ...state, history: [ ...state.history.slice(0, action.index), ...state.history.slice(action.index + 1) ] };
         case CALCULATOR.COPY_ONE:

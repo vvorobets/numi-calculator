@@ -1,13 +1,13 @@
 import { CALCULATOR } from './types';
 
-import { mockCalc } from './algorithms';
+import { parseInput } from './operations';
 
 export const updateInput = (input) => dispatch => {
     dispatch({ type: CALCULATOR.UPDATE_INPUT, input });
 };
 
 export const calculate = (input) => dispatch => {
-    dispatch({ type: CALCULATOR.CALCULATE, operation: { input, output: mockCalc(input) } });
+    dispatch({ type: CALCULATOR.CALCULATE, operation: { input, output: parseInput(input) } });
 };
 
 export const deleteOne = (index) => dispatch => {
@@ -20,4 +20,8 @@ export const copyOne = (buffer) => dispatch => {
 
 export const refresh = () => dispatch => {
     dispatch({ type: CALCULATOR.REFRESH });
+};
+
+export const handleError = (error) => dispatch => {
+    dispatch({ type: CALCULATOR.HANDLE_ERROR, error });
 };
