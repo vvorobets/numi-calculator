@@ -7,32 +7,27 @@ import { handleError } from './actions';
 
 export const parseInput = (input) => {
     input = input.trim();
-    let currentCharType = '';
-    let parsedExpression = [];
-    let currentUnit = '';
+    let currentCharType = '', currentUnit = '', parsedExpression = [];
     for (let i = 0; i < input.length; i++) {
         let x = input[i];
         switch(true) {
             case /\d/.test(x):
-                if (currentCharType === 'number') { // continue writing current number
-                    currentUnit = currentUnit.concat(x);
-                } else { // start writing new number
+                if (currentCharType === 'number') currentUnit = currentUnit.concat(x); // continue writing current number
+                else { // start writing new number
                     if (currentUnit) { // recordind previous data
                         parsedExpression.push(currentUnit);
                         currentUnit = '';
                     };
-                    if (x !== '0') {
-                        currentUnit = x;
-                    } else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal numbers
+                    if (x !== '0') currentUnit = x;
+                    else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal numbers
                         currentUnit = x.concat(input[i+1]);
                         i++;
                     } else console.error('Left trailing zeros are omitted');
                 }
                 currentCharType = 'number'; break;
             case /[A-Za-z]/.test(x):
-                if (currentCharType === 'letter') {
-                    currentUnit = currentUnit.concat(x);
-                } else {
+                if (currentCharType === 'letter') currentUnit = currentUnit.concat(x);
+                else {
                     if (currentCharType) {
                         if (currentUnit) {
                             parsedExpression.push(currentUnit);
@@ -42,7 +37,6 @@ export const parseInput = (input) => {
                     currentUnit = x;
                 }
                 currentCharType = 'letter'; break;
-            
             case (x===' '):
                 if (currentUnit) {
                     parsedExpression.push(currentUnit);
@@ -53,39 +47,30 @@ export const parseInput = (input) => {
                 if (currentUnit) parsedExpression.push(currentUnit);
                 return handleVariable(parsedExpression, input.slice(i+1));
             case (x===':'):
-                return parseInput(input.slice(i+1));
+                return `Label: input.slice(0, i)}; ${parseInput(input.slice(i+1))}`;
             case (x==='#'):
                 return 'Header';
             case (x==='"'):
                 let nextQuoteIndex = input.slice(i+1).indexOf('"') + i + 1;
-                if (nextQuoteIndex < 0) {
-                    return 'ERROR not closed quote'
-                }
+                if (nextQuoteIndex < 0) return 'ERROR not closed quote';
                 return `Comment: ${input.slice(i, nextQuoteIndex+1)}; ${parseInput(input.slice(0, i).concat(input.slice(nextQuoteIndex+1)))}`;
             case (x==='+'):
-                if (input[i+1] === '=') {
-                    return handleVariable(parsedExpression, input.slice(i+2));
-                } else return handleAdding(input);
+                if (input[i+1] === '=') return handleVariable(parsedExpression, input.slice(i+2));
+                else return handleAdding(input);
             case (x==='-'):
-                if (input[i+1] === '=') {
-                    return handleVariable(parsedExpression, input.slice(i+2));
-                } else return handleSubtracting(input);
+                if (input[i+1] === '=') return handleVariable(parsedExpression, input.slice(i+2));
+                else return handleSubtracting(input);
             case (x==='*'):
-                if (input[i+1] === '=') {
-                    return handleVariable(parsedExpression, input.slice(i+2));
-                } else return handleMultiplying(input);
+                if (input[i+1] === '=') return handleVariable(parsedExpression, input.slice(i+2));
+                else return handleMultiplying(input);
             case (x==='/'):
-                if (input[i+1] === '/') {
-                    return 'Line comment';
-                } else if (input[i+1] === '=') {
-                    return handleVariable(parsedExpression, input.slice(i+2));
-                } else return handleDividing(input);
+                if (input[i+1] === '/') return 'Line comment';
+                else if (input[i+1] === '=') return handleVariable(parsedExpression, input.slice(i+2));
+                else return handleDividing(input);
             case (x==='.'):
-                if (currentCharType === 'number') {
-                    currentUnit = currentUnit.concat(x);
-                } else {
-                    return 'Dots allowed within float point numbers only';
-                }; break;
+                if (currentCharType === 'number') currentUnit = currentUnit.concat(x);
+                else return 'Dots allowed within float point numbers only';
+                break;
             case (x==='%'): 
                 currentCharType = 'percentsign';
                 return '//TODO Percent accounting';
@@ -93,7 +78,7 @@ export const parseInput = (input) => {
                 currentCharType = 'dollarsign';
                 return '//TODO Dollar accounting';
             default:
-                console.log('Not found');
+                continue;
         }
     }
     if (currentUnit) { // adding last element
@@ -152,18 +137,78 @@ const handleDividing = (input) => {
     return operands[0] / operands[1];
 }
 
-// handle format
-const handleLabel = (input) => {
-    let operands = input.split(':');
-    if(operands.length > 2) {
-        return 'Multiple labeling is unsupported for now'; // as alternative might be just recursively slice next label
-    };
-    return 'Label, ' + parseInput(operands[1]);
+const functionMap = {
+    in: (x) => { return },
+    into: (x) => { return },
+    as: (x) => { return },
+    to: (x) => { return },
+    plus: (x, y) => { return x + y },
+    and: (x, y) => { return x + y }, 
+    // 'with', 
+    minus: (x, y) => { return x - y }, 
+    subtract: (x, y) => { return x - y }, 
+    without: (x, y) => { return x - y }, 
+    times: (x, y) => { return x * y }, 
+    // 'multiplied by', 
+    mul: (x, y) => { return x * y }, 
+    divide: (x, y) => { return x / y }, 
+    // 'divide by', 
+    // '^', (x, y) => { return x ^ y },
+    // '&', (x, y) => { return x & y },
+    // '|', (x, y) => { return x | y },
+    xor: (x, y) => { return x ^ y }, 
+    // '<<', (x, y) => { return x << y },
+    // '>>', (x, y) => { return x >> y },
+    mod: (x, y) => { return x % y }, 
+    fromunix: (x) => { return new Date(x) },
+    hex: (x) => { return parseFloat(x).toString(16) },
+    bin: (x) => { return parseFloat(x).toString(2) },
+    oct: (x) => { return parseFloat(x).toString(8) },
+    sci: (x) => { return parseFloat(x).toExponential(2); }, // 2 is arbitrary value and might be changed
+    scientific: (x) => { return parseFloat(x).toExponential(2); },
+    root: (x) => { return }, // TODO: implement
+    sqrt: (x) => { return Math.sqrt(x) },
+    cbrt: (x) => { return Math.cbrt(x) },
+    abs: (x) => { return Math.abs(x) },
+    log: (x, y) => { return Math.log2(x) }, // Returns the base 2 logarithm of a number.
+    ln: (x) => { return Math.log() },
+    fact: (x) => { return }, // TODO: implement
+    round: (x) => { return Math.round(x) },
+    ceil: (x) => { return Math.ceil(x) },
+    floor: (x) => { return Math.floor(x) },
+    sin: (x) => { return Math.sin(x) },
+    cos: (x) => { return Math.cos(x) },
+    tan: (x) => { return Math.tan(x) },
+    arcsin: (x) => { return Math.asin(x) },
+    arccos: (x) => { return Math.acos(x) },
+    arctan: (x) => { return Math.atan(x) },
+    sinh: (x) => { return Math.sinh(x) },
+    cosh: (x) => { return Math.cosh(x) },
+    tanh: (x) => { return Math.tanh(x) },
+    // general operations
+    sum: (x) => { return },
+    total: (x) => { return }, 
+    average: (x) => { return }, 
+    avg: (x) => { return },
 }
 
-const handleQuoteComment = () => {
-    return 'QuoteComment';
-}
+// regExp examples
+// const pattern = {
+//     weather: /What is the weather (.*?) in (\w+)\?$/,
+//     moneyExchange: /Convert (\d+) (\w+) to (\w+)$/,
+//     save: /Save title: (.*) body: (.*)/,
+//     random: /.*?\s[\#\@\)\₴\?\$0]/,
+//     quotes: /show quote/,
+//     call = /(^)@hello(\s|$)/
+// }
+
+// partial function example
+// function exchangeCurrency(amount, exchangeRate) {
+//     return (amount*exchangeRate).toFixed(2);
+// }
+// const FUNCTIONS = {
+//     hryvniaToDollar: exchangeCurrency.bind(null, 0.04),
+// }
 
 const keywordsList = [
     // conversion
@@ -195,13 +240,14 @@ const keywordsList = [
     // currencies
         '$', 'Euro', 'roubles', 'hryvnias',
     // constant
-        'Pi', 'E',
+        'Pi', 'E', 
     // function
         'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor','sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
     // measure
-        'px', 'em', 'ppi', // CSS
+        'px', 'em',  // CSS
+        'ppi', // CSS variable
         'kelvin', 'K','celsius', 'fahrenheit', // temperature
-        'meter', 'mil', 'points', 'lines', 'inch', 'hand', 'foot', 'yard', 'rod', 'chain', 'furlong', 'mile', 'cable', 'nautical mile', 'league', // length
+        'm', 'meter', 'mil', 'points', 'lines', 'inch', 'hand', 'foot', 'yard', 'rod', 'chain', 'furlong', 'mile', 'cable', 'nautical mile', 'league', // length
         'hectare', 'are', 'acre', 'square', 'sq', // area
         'pint', 'quart', 'gallon', 'tea spoon', 'table spoon', 'cup', 'cubic', 'cu', 'cb', // volume
         'gram', 'tonne', 'carat', 'centner', 'pound', 'stone', 'ounce', // weight

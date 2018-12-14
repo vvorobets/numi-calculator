@@ -31,7 +31,7 @@ class RegisterForm extends Component {
         e.preventDefault();
         // some input validation
         let errors = {};
-        let re1 = /^([a-zA-Z0-9\.])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        let re1 = /^([a-zA-Z0-9.])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$/;
         let re2 = /^[a-zA-Z]{2,30}$/;
         if (!re1.test(String(this.state.email).toLowerCase())) {
             errors.email = "Incorrect email format";
