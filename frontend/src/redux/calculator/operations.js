@@ -1,5 +1,10 @@
 import { handleError } from './actions';
 
+// TODO actions:
+    // SET_VARIABLE
+    // GET_VARIABLE
+    // HANDLE_ERROR
+
 export const parseInput = (input) => {
     input = input.trim();
     let currentCharType = '';
@@ -9,94 +14,127 @@ export const parseInput = (input) => {
         let x = input[i];
         switch(true) {
             case /\d/.test(x):
-                if (currentCharType === 'number') {
+                if (currentCharType === 'number') { // continue writing current number
                     currentUnit = currentUnit.concat(x);
-                } else {
-                    if (currentCharType) parsedExpression.push(currentUnit);
+                } else { // start writing new number
+                    if (currentUnit) { // recordind previous data
+                        parsedExpression.push(currentUnit);
+                        currentUnit = '';
+                    };
                     if (x !== '0') {
                         currentUnit = x;
-                    } else console.log('Left trailing zeros are omitted');
+                    } else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal numbers
+                        currentUnit = x.concat(input[i+1]);
+                        i++;
+                    } else console.error('Left trailing zeros are omitted');
                 }
                 currentCharType = 'number'; break;
             case /[A-Za-z]/.test(x):
                 if (currentCharType === 'letter') {
                     currentUnit = currentUnit.concat(x);
                 } else {
-                    if (currentCharType) parsedExpression.push(currentUnit);
+                    if (currentCharType) {
+                        if (currentUnit) {
+                            parsedExpression.push(currentUnit);
+                            currentUnit = '';
+                        };
+                    }
                     currentUnit = x;
                 }
                 currentCharType = 'letter'; break;
+            
             case (x===' '):
-                if (currentCharType === 'letter' && /[A-Za-z]/.test(input[i+1])) {
-                    currentUnit = currentUnit.concat(x);
-                } else currentCharType = 'whitespace';
+                if (currentUnit) {
+                    parsedExpression.push(currentUnit);
+                    currentUnit = '';
+                };
                 break;
-            case (x==='='): 
-                handleVariable(input); break;
+            case (x==='='):
+                if (currentUnit) parsedExpression.push(currentUnit);
+                return handleVariable(parsedExpression, input.slice(i+1));
             case (x===':'):
                 return parseInput(input.slice(i+1));
             case (x==='#'):
                 return 'Header';
             case (x==='"'):
-                return handleQuoteComment(input);
+                let nextQuoteIndex = input.slice(i+1).indexOf('"') + i + 1;
+                if (nextQuoteIndex < 0) {
+                    return 'ERROR not closed quote'
+                }
+                return `Comment: ${input.slice(i, nextQuoteIndex+1)}; ${parseInput(input.slice(0, i).concat(input.slice(nextQuoteIndex+1)))}`;
             case (x==='+'):
                 if (input[i+1] === '=') {
-                    return handleVariable(input);
+                    return handleVariable(parsedExpression, input.slice(i+2));
                 } else return handleAdding(input);
             case (x==='-'):
                 if (input[i+1] === '=') {
-                    return handleVariable(input);
+                    return handleVariable(parsedExpression, input.slice(i+2));
                 } else return handleSubtracting(input);
             case (x==='*'):
                 if (input[i+1] === '=') {
-                    return handleVariable(input);
+                    return handleVariable(parsedExpression, input.slice(i+2));
                 } else return handleMultiplying(input);
             case (x==='/'):
                 if (input[i+1] === '/') {
                     return 'Line comment';
                 } else if (input[i+1] === '=') {
-                    return handleVariable(input);
+                    return handleVariable(parsedExpression, input.slice(i+2));
                 } else return handleDividing(input);
             case (x==='.'):
                 if (currentCharType === 'number') {
                     currentUnit = currentUnit.concat(x);
                 } else {
                     return 'Dots allowed within float point numbers only';
-                }
+                }; break;
             case (x==='%'): 
                 currentCharType = 'percentsign';
-                return '//TODO Percent accounting'; break;
+                return '//TODO Percent accounting';
             case (x==='$'): 
                 currentCharType = 'dollarsign';
-                return '//TODO Dollar accounting'; break;
+                return '//TODO Dollar accounting';
             default:
                 console.log('Not found');
         }
     }
-    parsedExpression.push(currentUnit);
+    if (currentUnit) { // adding last element
+        parsedExpression.push(currentUnit);
+    };
     for(let unit of parsedExpression) {
-        console.log(unit, keywordsList.includes(unit))
+        // TODO
     }
-    return input.length;
+    return parsedExpression[0];
 }
 
-const handleVariable = (input) => {
-    let operands = input.split('=');
-    if(operands.length > 2) {
-        console.log('Transitive variable declaration is unsupported for now'); // or calculate recursively
-        return;
+const handleVariable = (name, value) => { // name is an array
+    if (name.length > 1) { 
+        console.error('Variable name cannot contain whitespaces or special characters. Usage: [variableName] [+-*/]= [some expression]');
+        return 'ERROR complex name'; // TODO: HANDLE_ERROR
     };
-    let variable = operands[0];
-    if(variable[variable.length - 1] === '+') { // to get variable from store
-        handleAdding();
+    console.log('Handling variable...', name[0], value);
+    let variableName = checkVariableName(name[0].trim()), val = parseInput(value.trim());
+    return `${name[0].trim()} = ${val}`; // TODO: STORE_VARIABLE && (?)SHOW_RESULT
+}
+
+const checkVariableName = (name) => {
+    if (/\d/.test(name[0])) {
+        console.error('first number');
+        return false; // 'ERROR first number'; 'Variable name should not start with number' // TODO: HANDLE_ERROR
     }
-    return 'Variable';
+    for(let letter of name) { // underscore '_' is allowed
+        if(/W/.test(letter)) {
+            return false; // 'ERROR spec char'; 'Variable name should not contain whitespaces or special characters'
+        }
+    }
+    if (keywordsList.includes(name)) {
+        console.error('name is keyword'); // TODO: HANDLE_ERROR
+        return false; // 'ERROR name is keyWord'; // 'Keywords cannot be used as a variable' 
+    } else return true;
 }
 
 // handle operations
 const handleAdding = (input) => {
     let operands = input.split('+');
-    return operands[0] + operands[1]; // !concatenation
+    return parseFloat(operands[0]) + parseFloat(operands[1]);
 }
 
 const handleSubtracting = (input) => {
@@ -155,7 +193,7 @@ const keywordsList = [
         'XTS', 'XUA', 'XXX', 'YER', 'ZAR', 'ZMW',
         'AFA', 'DASH', 'ETH', 'VTC', 'XBC', 'XBT', 'BTC', 'XLM', 'XMR', 'XRP', 'ZEC', 'BTU', // crypto currencies
     // currencies
-        '$', 'Euro', 
+        '$', 'Euro', 'roubles', 'hryvnias',
     // constant
         'Pi', 'E',
     // function
@@ -175,7 +213,9 @@ const keywordsList = [
         'deci', 'centi', 'milli', 'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto', 
         'Y','Z','E','P','T','G','M','k','h','da','d','c','m','μ','n','p','f','a','z','y', // symbols
     // general
-    'prev', 'sum', 'total', 'average', 'avg', 
+    'sum', 'total', 'average', 'avg', 
+    // as variable
+    'prev', 
 ]
 
 
