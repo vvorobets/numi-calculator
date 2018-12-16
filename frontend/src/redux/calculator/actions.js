@@ -1,27 +1,38 @@
-import { CALCULATOR } from './types';
+import { createAction } from 'redux-actions';
 
-import { parseInput } from './operations';
+import types from './types';
 
-export const updateInput = (input) => dispatch => {
-    dispatch({ type: CALCULATOR.UPDATE_INPUT, input });
-};
+import { parseInput } from './helpers/operations';
 
-export const calculate = (input) => dispatch => {
-    dispatch({ type: CALCULATOR.CALCULATE, operation: { input, output: parseInput(input) } });
-};
+export const updateInput = createAction(
+    types.UPDATE_INPUT,
+    input => ({ input, markdown: parseInput(input) })
+);
 
-export const deleteOne = (index) => dispatch => {
-    dispatch({ type: CALCULATOR.DELETE_ONE, index });
-};
+export const calculate = createAction(
+    types.CALCULATE,
+    input => ({ input, output: parseInput(input) })
+);
 
-export const copyOne = (buffer) => dispatch => {
-    dispatch({ type: CALCULATOR.COPY_ONE, buffer });
-};
+export const deleteOne = createAction(
+    types.DELETE_ONE,
+    index => index
+);
 
-export const refresh = () => dispatch => {
-    dispatch({ type: CALCULATOR.REFRESH });
-};
+export const copyOne = createAction(
+    types.COPY_ONE,
+    updates => updates
+);
+  
+export const refresh = createAction(
+    types.REFRESH
+);
 
-export const handleError = (error) => dispatch => {
-    dispatch({ type: CALCULATOR.HANDLE_ERROR, error });
-};
+export const handleError = createAction(
+    types.HANDLE_ERROR,
+    error => error
+);
+
+// export const userLogout = () => dispatch => {
+//     dispatch({ type: USER.LOGOUT });
+// };

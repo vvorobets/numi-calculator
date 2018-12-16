@@ -144,10 +144,91 @@ body {
   justify-content: space-between;
 }
 
-.operation-item__input {
+.operation-item__input-block, .operation-item__input-background, .operation-item__textarea {
+  height: 40px;
+}
+
+.operation-item__input-block {
   width: 82%;
+  display: block;
+  margin: 0 auto;
+  -webkit-text-size-adjust: none;
+}
+
+.operation-item__input-background {
+  width: 100%;
   padding: .25rem;
+}
+
+.operation-item__input-backlights, .operation-item__textarea {
+  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
   font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.operation-item__input-background {
+  position: absolute;
+  z-index: 1;
+  width: calc(82% - 16.4rem);
+  border: 1px solid #685972;
+  background-color: #fff;
+  overflow: auto;
+  pointer-events: none;
+}
+
+.operation-item__input-backlights {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: transparent;
+}
+
+.operation-item__markdown--header {
+  color: orange;
+}
+
+.operation-item__markdown--label {
+  color: orange;
+}
+
+.operation-item__markdown--comment {
+  color: gray;
+  font-style: italic;
+}
+
+.operation-item__markdown--measureUnit {
+  color: lightblue;
+}
+
+.operation-item__markdown--keyword {
+  color: blue;
+}
+
+.operation-item__markdown--numberValue {
+  color: black;
+}
+
+.operation-item__markdown--error {
+  color:red;
+}
+
+.operation-item__textarea {
+  position: absolute;
+  display: block;
+  z-index: 2;
+  width: calc(82% - 16.4rem);
+  margin: 0;
+  padding: .25rem;
+  border: 1px solid #999999;
+  border-radius: 0;
+  color: transparent;
+  background-color: transparent;
+  overflow: auto;
+  resize: none;
+}
+
+.operation-item__textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #c6aada;
 }
 
 .operation-item__button {

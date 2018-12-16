@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
@@ -75,6 +76,15 @@ class LoginForm extends Component {
 		);
 	}
 }
+
+LoginForm.propTypes = {
+	user: PropTypes.shape({
+		fetchingStatus: PropTypes.string,
+		loginErrorMessage: PropTypes.string,
+		username: PropTypes.string
+	}),
+	userLogin: PropTypes.func
+};
 
 const mapStateToProps = ({ user }) => ({
 	user

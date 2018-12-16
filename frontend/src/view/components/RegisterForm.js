@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
@@ -118,6 +119,15 @@ class RegisterForm extends Component {
 		);
 	}
 }
+
+RegisterForm.propTypes = {
+	user: PropTypes.shape({
+		fetchingStatus: PropTypes.string,
+		signupErrorMessage: PropTypes.string,
+		username: PropTypes.string
+	}),
+	userSignup: PropTypes.func
+};
 
 const mapStateToProps = ({ user }) => ({
 	user

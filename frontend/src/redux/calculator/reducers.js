@@ -1,26 +1,22 @@
-import { CALCULATOR } from './types';
+import { handleActions } from 'redux-actions';
+import types from './types';
 import { USER } from '../user/types'; // one of the options to clear state after logout
 
-const DEFAULT_CALCULATOR_STATE = { currentInput: '', buffer: '', history: [], errorMessage: '' };
+const defaultState = { 
+    currentInput: { input: '', markdown: [] }, 
+    buffer: null, 
+    history: [], 
+    errorMessage: null 
+};
 
-const calculatorReducer = (state = DEFAULT_CALCULATOR_STATE, action) => {
-    switch(action.type) {
-        case CALCULATOR.UPDATE_INPUT:
-            return { ...state, currentInput: action.input };
-        case CALCULATOR.CALCULATE:
-            return { ...state, currentInput: '', history: [ ...state.history, action.operation ]};
-        case CALCULATOR.HANDLE_ERROR: 
-            return { ...state, errorMessage: action.error };
-        case CALCULATOR.DELETE_ONE:
-            return { ...state, history: [ ...state.history.slice(0, action.index), ...state.history.slice(action.index + 1) ] };
-        case CALCULATOR.COPY_ONE:
-            return { ...state, buffer: action.buffer };
-        case CALCULATOR.REFRESH:
-        case USER.LOGOUT:
-            return DEFAULT_CALCULATOR_STATE;
-        default:
-            return state;
-    }
-}
+const calculator = handleActions({
+    [types.UPDATE_INPUT]: (state, action) => ({ ...state, currentInput: action.payload }),
+    [types.CALCULATE]: (state, action) => ({ ...state, currentInput: '', history: [ ...state.history, action.payload ]}),
+    [types.HANDLE_ERROR]: (state, action) => ({ ...state, errorMessage: action.payload }),
+    [types.COPY_ONE]: (state, action) => ({ ...state, buffer: action.payload }),
+    [types.DELETE_ONE]: (state, action) => ({ ...state, history: [ ...state.history.slice(0, action.payload), ...state.history.slice(action.payload + 1) ] }),
+    [types.REFRESH]: () => ({ ...defaultState }),
+    [USER.LOGOUT]: () => ({ ...defaultState }),
+}, defaultState);
 
-export default calculatorReducer;
+export default calculator;

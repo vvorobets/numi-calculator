@@ -1,4 +1,4 @@
-export const CALCULATOR = {
+const types = {
     UPDATE_INPUT: 'CALCULATOR_UPDATE_INPUT',
     CALCULATE: 'CALCULATOR_CALCULATE',
     HANDLE_ERROR: 'CALCULATOR_HANDLE_ERROR',
@@ -6,3 +6,5 @@ export const CALCULATOR = {
     COPY_ONE: 'CALCULATOR_COPY_ONE',
     REFRESH: 'CALCULATOR_REFRESH'
 }
+
+export default types;
