@@ -6,27 +6,6 @@ import {
 } from './keywordsLists';
 
 export const handleInput = input => (dispatch, getState) => {
-    const markdown = parseInput(input); // type: array of parsed input's elements
-    dispatch(updateInput(input, markdown));
-
-    let errors = 0, output, reducedMarkdown = [];
-    if (markdown) {
-        reducedMarkdown = markdown.map(item => {
-            if(item.type === 'error')  {
-                errors++;
-                dispatch(handleError(item.value))
-            } else if (item.type === 'word') {
-                errors++;
-                dispatch(handleError('Words provided are no keywords'));
-            } else if (item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' 
-                || item.type === 'operation') {
-                    return item;
-            } // wipe out comments, labels etc
-        });
-    };
-    if(errors) output = '';
-    else if (reducedMarkdown) output = calculateInput(arr); // type: string - result value
-    dispatch(updateOutput(output));
 
     const calculateInput = arr => { // type: array
         // test for eval()
@@ -35,8 +14,12 @@ export const handleInput = input => (dispatch, getState) => {
         let pat = /[\d+-/*|^&<>\s/]/;
         for (let n of stringifiedInput) {
             if (!pat.test(n)) testForEval = false;
-        }
-        if (testForEval) return eval(stringifiedInput);
+        };
+        if (testForEval) {
+            let res = eval(stringifiedInput);
+            if (!isNaN(res)) return res.toString();
+            else return '';
+        };
     
         if (arr.length === 1) {
             if (arr[0].type === 'numberValue') return arr[0].value;
@@ -86,7 +69,9 @@ export const handleInput = input => (dispatch, getState) => {
                         secondOperandValue = arr[i+2].value;
                         switch(arr[i+1].value) {
                             case '+':
-                                resultValue = firstOperandValue + secondOperandValue;
+                                resultValue = firstOperandValue + secondOperandValue; break;
+                            default:
+                                continue;
                         }
                     }
                 }
@@ -312,6 +297,31 @@ export const handleInput = input => (dispatch, getState) => {
             return { type: 'error', value: 'Keywords cannot be used as a variable' };
         } else return { type: 'variableName', value: name }; // TODO: STORE_VARIABLE && (?)SHOW_RESULT
     }
+
+    const markdown = parseInput(input); // type: array of parsed input's elements
+    dispatch(updateInput(input, markdown));
+
+    let errors = 0, output, reducedMarkdown = [];
+    if (markdown) {
+        reducedMarkdown = markdown.map(item => {
+            if(item.type === 'error')  {
+                errors++;
+                dispatch(handleError(item.value));
+                
+            } else if (item.type === 'word') {
+                errors++;
+                dispatch(handleError('Words provided are no keywords'));
+                
+            } else if (item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' 
+                || item.type === 'operation') {
+                    return item;
+            } // wipe out comments, labels etc
+        });
+    };
+    if(errors) output = '';
+    else if (reducedMarkdown) output = calculateInput(reducedMarkdown); // type: string - result value
+    dispatch(updateOutput(output));
+
 };
 
 // regExp examples
