@@ -3,23 +3,21 @@ import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
-import { updateInput, calculate, handleError } from '../../../redux/calculator/actions';
+import { calculate, handleError } from '../../../redux/calculator/actions';
 
+import { handleInput } from '../../../redux/calculator/helpers/operations';
 import { renderMarkdown } from './helpers/renderMarkdown';
-const OperationInput = (props) => {
-    const handleInput = (e) => {
-        return props.updateInput(e.target.value);
-    };
 
-    const handlePaste = () => {
-        return props.updateInput(props.calculator.currentInput.input + props.calculator.buffer); // ensure concatenation of two number values
-    }
+const OperationInput = (props) => {
+    const getInput = e => props.handleInput(e.target.value);
+
+    const handlePaste = () => props.updateInput(props.calculator.currentInput.input + props.calculator.buffer); // ensure concatenation of two number values
 
     const handleCalculate = () => {
         if(!props.calculator.currentInput.input.trim().length) {
             return props.handleError('Cannot operate empty input');
         }
-        return props.calculate(props.calculator.currentInput.input);
+        return props.calculate(props.calculator.currentInput.input, props.calculator.currentInput.markdown, props.calculator.currentInput.output);
     }
 
     const handleOnKeyPress = (e) => {
@@ -43,7 +41,7 @@ const OperationInput = (props) => {
                 </div>
             <textarea
                 onKeyPress={ handleOnKeyPress }
-                onChange={ handleInput }
+                onChange={ getInput }
                 value={ props.calculator.currentInput.input }
                 placeholder="Input here" 
                 className="operation-item__textarea"
@@ -73,7 +71,7 @@ OperationInput.propTypes = {
         }),
 		buffer: PropTypes.string
 	}),
-    updateInput: PropTypes.func,
+    handleInput: PropTypes.func,
     calculate: PropTypes.func,
     handleError: PropTypes.func
 };
@@ -84,7 +82,7 @@ const mapStateToProps = ({ calculator }) => ({
 
 const OperationInputConnected = connect(
     mapStateToProps,
-    { updateInput, calculate, handleError }
+    { handleInput, calculate, handleError }
 )(OperationInput);
 
 export default OperationInputConnected;

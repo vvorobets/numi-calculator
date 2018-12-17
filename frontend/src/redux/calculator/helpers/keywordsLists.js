@@ -1,6 +1,10 @@
-export const numberSystems = [ 'hex', 'bin', 'oct' ];
+export const MULTI_LINE_OPERATIONS_LIST = [
+    'sum', 'total', 'average', 'avg', 
+];
 
-export const scales = [ 
+export const NUMBER_SYSTEMS = [ 'hex', 'bin', 'oct' ];
+
+export const SCALES = [ 
     'thousand', 'million', 'billion', 
     // measurePrefixes
     'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega', 'kilo', 'hecto', 'deca', 
@@ -11,7 +15,7 @@ export const scales = [
     'kibi', 'Ki','mebi', 'Mi','gibi', 'Gi', 
 ];
 
-export const measureUnits = [
+export const MEASURE_UNITS = [
     'kelvin', 'K','celsius', 'fahrenheit', // temperature
     'm', 'meter', 'mil', 'points', 'lines', 'inch', 'hand', 'foot', 'yard', 'rod', 'chain', 'furlong', 'mile', 'cable', 'nautical mile', 'league', // length
     'meters', 'mils', 'inches', 'hands', 'feet', 'yards', 'rods', 'chains', 'furlongs', 'miles', 'cables', 'nautical miles', 'leagues', // length plural
@@ -27,7 +31,7 @@ export const measureUnits = [
     'px', 'em',  // CSS
 ];
 
-export const currencies = [
+export const CURRENCIES = [
     '$', 'euro', 'euros', 'roubles', 'hryvnias',
     // currencies
     'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 
@@ -45,3 +49,15 @@ export const currencies = [
     // crypto currencies
     'AFA', 'DASH', 'ETH', 'VTC', 'XBC', 'XBT', 'BTC', 'XLM', 'XMR', 'XRP', 'ZEC', 'BTU', 
 ];
+
+export const oneArgumentFunctionsList = [];
+
+export const twoArgumentFunctionsList = []; 
+
+export const pureScalesList = [];
+
+export const extendedMeasureUnitsList = []; // TODO: combine scales & SI units
+
+export const multiWordKeywords = [ 'nautical mile', 'nautical miles', 'tea spoon', 'tea spoons', 'table spoon', 'table spoons',
+    'multiplied by', 'divide by', 'as a', 'of what is', 'on what is', 'off what is' ];
+// 'as a % of', 'as a % on', 'as a % off', '% of what is', '% on what is', '% off what is'

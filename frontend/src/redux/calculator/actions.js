@@ -2,16 +2,20 @@ import { createAction } from 'redux-actions';
 
 import types from './types';
 
-import { parseInput, calculateInput } from './helpers/operations';
-
 export const updateInput = createAction(
     types.UPDATE_INPUT,
-    input => ({ input, markdown: parseInput(input) })
+    (input, markdown) => ({ input, markdown })
 );
 
-export const calculate = createAction(
+export const updateOutput = createAction(
+    types.UPDATE_OUTPUT,
+    output => output
+);
+
+// this one also creates new row and cleans current input
+export const calculate = createAction( 
     types.CALCULATE,
-    input => ({ input, markdown: parseInput(input), output: calculateInput(parseInput(input)) })
+    (input, markdown, output) => ({ input, markdown, output })
 );
 
 export const deleteOne = createAction(

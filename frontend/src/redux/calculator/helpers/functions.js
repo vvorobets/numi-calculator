@@ -1,11 +1,13 @@
 export const FUNCTIONS_KEYWORDS_LIST = [
     // conversion
     'in', 'into', 'as', 'to',
+    // percentages
+    'on', 'of', 'off',
     // time // ! + in
     'fromunix',
     // operations
     'plus', 'and', 'with', 'minus', 'subtract', 'without', 
-    'times', 'multiplied by', 'mul', 'divide', 'divide by', 
+    'times', 'multiplied by', 'mul', 'divide by', 
     'mod',  // '^', '&', '|', 'xor', '<<', '>>', - to be handled by eval()
     // number
     'sci', 'scientific',
@@ -20,7 +22,7 @@ export const FUNCTION_GROUPS = {
     'plus': [ 'plus', 'and', 'with', '+' ], 
     'minus': [ 'minus', 'subtract', 'without', '-' ], 
     'multiply': [ 'times', 'multiplied by', 'mul', '*' ],
-    'divide': [ 'divide', 'divide by', '/' ],
+    'divide': [ 'divide by', '/' ],
     'mod': [ 'mod' ],
     'sci': [ 'sci', 'scientific' ],
 }
