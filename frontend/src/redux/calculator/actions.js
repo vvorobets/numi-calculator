@@ -2,7 +2,7 @@ import { createAction } from 'redux-actions';
 
 import types from './types';
 
-import { parseInput } from './helpers/operations';
+import { parseInput, calculateInput } from './helpers/operations';
 
 export const updateInput = createAction(
     types.UPDATE_INPUT,
@@ -11,7 +11,7 @@ export const updateInput = createAction(
 
 export const calculate = createAction(
     types.CALCULATE,
-    input => ({ input, output: parseInput(input) })
+    input => ({ input, markdown: parseInput(input), output: calculateInput(parseInput(input)) })
 );
 
 export const deleteOne = createAction(

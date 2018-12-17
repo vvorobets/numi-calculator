@@ -68,7 +68,8 @@ OperationInput.propTypes = {
             markdown: PropTypes.arrayOf(PropTypes.shape({
                 type: PropTypes.string,
                 value: PropTypes.string
-            }))
+            })),
+            output: PropTypes.string
         }),
 		buffer: PropTypes.string
 	}),

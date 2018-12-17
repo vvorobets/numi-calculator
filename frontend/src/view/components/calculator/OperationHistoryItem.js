@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
@@ -25,6 +26,22 @@ const OperationHistoryItem = (props) => {
         </div>
     )
 }
+
+OperationHistoryItem.propTypes = {
+	calculator: PropTypes.shape({
+		currentInput: PropTypes.shape({
+            input: PropTypes.string,
+            markdown: PropTypes.arrayOf(PropTypes.shape({
+                type: PropTypes.string,
+                value: PropTypes.string
+            })),
+            output: PropTypes.string
+        }),
+		buffer: PropTypes.string
+	}),
+    copyOne: PropTypes.func,
+    deleteOne: PropTypes.func,
+};
 
 // const mapStateToProps = ({ }) => ({
 	
