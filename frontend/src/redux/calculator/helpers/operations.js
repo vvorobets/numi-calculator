@@ -10,7 +10,21 @@ const oneArgumentFunctionsList = [], twoArgumentFunctionsList = [], pureScalesLi
     // GET_VARIABLE
     // HANDLE_ERROR
 
+// export const handleError = () => (dispatch, getState) => {
+//     dispatch({ type: 'CALCULATE_HANDLE_ERROR' });
+// };
+
 export const calculateInput = (input) => { // type: array
+
+    // test for eval()
+    let res1 = input.map(item => item.value).join(' ');
+    let testForEvalFlag = true
+    let pat = /[\d+-/*|^&<>\s/]/;
+    for (let n of res1) {
+        if (!pat.test(n)) testForEvalFlag = false;
+    }
+    if (testForEvalFlag) return eval(res1);
+
     input.forEach(item => { if(item.type === 'error' || item.type === 'word') return ''; }); // plain words don't make sense
     let arr = input.filter(item => item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
     if (arr.length === 1) {
@@ -80,7 +94,7 @@ export const calculateInput = (input) => { // type: array
                 // }
             } else return '';
         } else {
-            return resultValue.toFixed(4).toString();
+            return resultValue.toString();
         }
     }
 }

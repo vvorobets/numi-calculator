@@ -33,6 +33,3 @@ export const handleError = createAction(
     error => error
 );
 
-// export const userLogout = () => dispatch => {
-//     dispatch({ type: USER.LOGOUT });
-// };

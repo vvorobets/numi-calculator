@@ -2,6 +2,7 @@
 // function exchangeCurrency(amount, exchangeRate) {
 //     return (amount*exchangeRate).toFixed(2);
 // }
+
 const FUNCTIONS = {
     kelvinToCelcius: amount => { return (amount - 273.15).toFixed(2); },
     kelvinToFahrenheit: amount => { return (amount * 1.8 - 459.67).toFixed(2); },

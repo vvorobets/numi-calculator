@@ -1,12 +1,12 @@
 export const FUNCTIONS_KEYWORDS_LIST = [
     // conversion
     'in', 'into', 'as', 'to',
-    // time
+    // time // ! + in
     'fromunix',
     // operations
     'plus', 'and', 'with', 'minus', 'subtract', 'without', 
     'times', 'multiplied by', 'mul', 'divide', 'divide by', 
-    '^', '&', '|', 'xor', '<<', '>>', 'mod', 
+    'mod',  // '^', '&', '|', 'xor', '<<', '>>', - to be handled by eval()
     // number
     'sci', 'scientific',
     // Math functions
@@ -14,40 +14,38 @@ export const FUNCTIONS_KEYWORDS_LIST = [
     'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
 ]
 
+export const FUNCTION_GROUPS = {
+    'into': [ 'in', 'into', 'as', 'to' ],
+    'fromunix': [ 'fromunix' ],
+    'plus': [ 'plus', 'and', 'with', '+' ], 
+    'minus': [ 'minus', 'subtract', 'without', '-' ], 
+    'multiply': [ 'times', 'multiplied by', 'mul', '*' ],
+    'divide': [ 'divide', 'divide by', '/' ],
+    'mod': [ 'mod' ],
+    'sci': [ 'sci', 'scientific' ],
+}
+
 export const functionMap = {
     in: (x) => { return },
     into: (x) => { return },
     as: (x) => { return },
     to: (x) => { return },
     plus: (x, y) => { return x + y },
-    and: (x, y) => { return x + y }, 
-    // 'with', 
     minus: (x, y) => { return x - y }, 
-    subtract: (x, y) => { return x - y }, 
-    without: (x, y) => { return x - y }, 
     times: (x, y) => { return x * y }, 
-    // 'multiplied by', 
-    mul: (x, y) => { return x * y }, 
     divide: (x, y) => { return x / y }, 
-    // 'divide by', 
-    // '^', (x, y) => { return x ^ y },
-    // '&', (x, y) => { return x & y },
-    // '|', (x, y) => { return x | y },
     xor: (x, y) => { return x ^ y }, 
-    // '<<', (x, y) => { return x << y },
-    // '>>', (x, y) => { return x >> y },
     mod: (x, y) => { return x % y }, 
     fromunix: (x) => { return new Date(x) },
     hex: (x) => { return parseFloat(x).toString(16) },
     bin: (x) => { return parseFloat(x).toString(2) },
     oct: (x) => { return parseFloat(x).toString(8) },
     sci: (x) => { return parseFloat(x).toExponential(2); }, // 2 is arbitrary value and might be changed
-    scientific: (x) => { return parseFloat(x).toExponential(2); },
-    root: (x) => { return }, // TODO: implement
+    // root: (x) => { return }, // TODO: implement
     sqrt: (x) => { return Math.sqrt(x) },
     cbrt: (x) => { return Math.cbrt(x) },
     abs: (x) => { return Math.abs(x) },
-    log: (x) => { return Math.log2(x) }, // Returns the base 2 logarithm of a number.
+    log: (x) => { return Math.log2(x) },
     ln: (x) => { return Math.log(x) },
     fact: (x) => { return }, // TODO: implement
     round: (x) => { return Math.round(x) },
@@ -62,6 +60,7 @@ export const functionMap = {
     sinh: (x) => { return Math.sinh(x) },
     cosh: (x) => { return Math.cosh(x) },
     tanh: (x) => { return Math.tanh(x) },
+    
     // general operations
     sum: (x) => { return },
     total: (x) => { return }, 
