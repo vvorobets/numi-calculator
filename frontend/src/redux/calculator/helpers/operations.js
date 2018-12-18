@@ -86,6 +86,10 @@ console.log('x is: ', x);
                 break;
             case (x===' '):
                 if (currentUnit) {
+                    if (multiWordKeywords.includes(currentUnit)) {
+                        parsedExpression.push({ type: 'operation', value: currentUnit });
+                        currentUnit = '';
+                    }
                     let isMultiWordKeyword = false;
                     multiWordKeywords.forEach(item => {
                         if (item.startsWith(currentUnit)) {
@@ -111,9 +115,13 @@ console.log('x is: ', x);
                 });
                 if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
                 else {
-                    parsedExpression.map(item => {
-                        if (item.type === 'word') item = checkVariableName(item.value);
-                    })
+                    let varIndex;
+                    parsedExpression.forEach((item, i) => {
+                        if (item.type === 'word') {
+                            varIndex = i; 
+                        }
+                    });
+                    parsedExpression[varIndex] = checkVariableName(reducedParsedExpression[0].value);
                 }
                 parsedExpression.push({ type: 'operation', value: '='});
                 currentUnit = ''; break;
@@ -129,74 +137,12 @@ console.log('x is: ', x);
                 if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
                 currentUnit = '"';
                 break;
-            case (x==='+'):
-                if (input[i+1] === '=') {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    let reducedParsedExpression = parsedExpression.filter(item => {
-                        return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
-                        || item.type === 'operation' || item.type === 'variableName';
-                    });
-                    if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
-                    else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
-                    parsedExpression.push({ type: 'operation', value: '+='});
+            case (/[+*-/]/.test(x)):
+                if (x === '/' && input[i+1] === '/') { 
+                    parsedExpression.push({ type: 'comment', value: '//' }); 
+                    parsedExpression.push({ type: 'error', value: 'Usage: // Line comment' });
                     i++;
-                } else {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    parsedExpression.push({ type: 'operation', value: '+' });
                 }
-                break;
-            case (x==='-'):
-                if (input[i+1] === '=') {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    let reducedParsedExpression = parsedExpression.filter(item => {
-                        return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
-                        || item.type === 'operation' || item.type === 'variableName';
-                    });
-                    if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
-                    else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
-                    parsedExpression.push({ type: 'operation', value: '-='});
-                    i++;
-                }  else {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    parsedExpression.push({ type: 'operation', value: '-' });
-                }
-                break;
-            case (x==='*'):
-                if (input[i+1] === '=') {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    let reducedParsedExpression = parsedExpression.filter(item => {
-                        return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
-                        || item.type === 'operation' || item.type === 'variableName';
-                    });
-                    if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
-                    else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
-                    parsedExpression.push({ type: 'operation', value: '*='});
-                    i++;
-                } else  {
-                    if (currentUnit) {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
-                    }
-                    parsedExpression.push({ type: 'operation', value: '*' });
-                }
-                break;
-            case (x==='/'):
-                if (input[i+1] === '/') parsedExpression.push({ type: 'error', value: 'Usage: // Line comment' }); 
                 else if (input[i+1] === '=') {
                     if (currentUnit) {
                         parsedExpression.push(identifyUnit(currentUnit));
@@ -208,48 +154,42 @@ console.log('x is: ', x);
                     });
                     if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
-                    parsedExpression.push({ type: 'operation', value: '+='});
+                    parsedExpression.push({ type: 'operation', value: XPathExpression.concat('=')});
                     i++;
-                }  else {
+                } else {
                     if (currentUnit) {
                         parsedExpression.push(identifyUnit(currentUnit));
                         currentUnit = '';
                     }
-                    parsedExpression.push({ type: 'operation', value: '/' });
+                    parsedExpression.push({ type: 'operation', value: x });
                 }
                 break;
             case (x==='.'):
                 if (currentCharType === 'number') currentUnit = currentUnit.concat(x);
                 else parsedExpression.push({ type: 'error', value: 'Dots allowed within float point numbers only' });
                 break;
-            case (x==='%'): 
-                currentCharType = 'percentsign';
-                parsedExpression.push({ type: 'error', value: 'TODO: Percent accounting' }); break;
-            case (x==='$'): 
-                currentCharType = 'dollarsign';
-                parsedExpression.push({ type: 'measureUnit', value: '$' }); break;
-            case (x==='^'): 
-                currentCharType = '';
-                parsedExpression.push({ type: 'operation', value: '^' }); break;
-            case (x==='|'): 
-                currentCharType = '';
-                parsedExpression.push({ type: 'operation', value: '|' }); break;
-            case (x==='&'): 
-                currentCharType = '';
-                parsedExpression.push({ type: 'operation', value: '&' }); break;
-            case (x==='>'): 
-                currentCharType = '';
-                if (input[i+1] === '>') {
-                    parsedExpression.push({ type: 'operation', value: '>>' });
-                    i++
-                } else parsedExpression.push({ type: 'word', value: '>' });  
-                break;
-            case (x==='<'): 
-                if (input[i+1] === '<') {
-                    parsedExpression.push({ type: 'operation', value: '<<' });
-                    i++;
+            case (/[%$]/.test(x)): 
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
                 }
-                else parsedExpression.push({ type: 'word', value: '<' });  
+                if (currentCharType) currentCharType = '';
+                parsedExpression.push({ type: 'measureUnit', value: x }); 
+                break;
+            case (/[()^&|]/.test(x)): 
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                }
+                currentCharType = '';
+                parsedExpression.push({ type: 'operation', value: x }); 
+                break;
+            case (/[<>]/.test(x)): 
+                currentCharType = '';
+                if (input[i+1] === x) {
+                    parsedExpression.push({ type: 'operation', value: x.concat(x) });
+                    i++
+                } else parsedExpression.push({ type: 'word', value: x });  
                 break;
             default:
                 continue;
@@ -263,7 +203,10 @@ console.log('x is: ', x);
     return parsedExpression;
 }
 
+
+
 const calculateInput = arr => { // type: array
+    
     // test for eval()
     if (!arr) return '';
 console.log('calc arr: ', arr);
@@ -356,6 +299,8 @@ console.log('calc arr: ', arr);
         }
     }
 }
+
+
 
 const checkVariableName = name => {
     if (/\d/.test(name)) { // this clause is unreachable

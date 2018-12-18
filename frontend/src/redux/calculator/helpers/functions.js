@@ -13,6 +13,7 @@ export const FUNCTIONS_KEYWORDS_LIST = [
     'sci', 'scientific',
     // Math functions
     'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor',
+    // Trigonometry
     'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
 ]
 

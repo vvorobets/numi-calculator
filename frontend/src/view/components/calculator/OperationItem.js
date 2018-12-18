@@ -19,9 +19,7 @@ const OperationItem = (props) => {
     }
 
     const deleteLine = () => { 
-        if (props.index) {
-            props.deleteLine(props.index);
-        }
+        props.deleteLine(props.index);
     };
 
     return (

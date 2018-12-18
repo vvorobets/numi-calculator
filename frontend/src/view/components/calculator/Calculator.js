@@ -8,14 +8,15 @@ import { refresh } from '../../../redux/calculator/actions';
 import OperationItem from './OperationItem';
 
 const Calculator = (props) => {
-    const historyArray = props.calculator.history.map((item, i) => { 
-        return <OperationItem 
-            key={ i }
-            index={ i } // to get key from the props
-            content={ item }
-        /> 
-    });
-    
+
+    const historyArray = props.calculator.history.map((item, i) => {
+            return <OperationItem 
+                key={ i }
+                index={ i } // to get key from the props
+                content={ item }
+            /> 
+        });
+        
     return (
         <>
         <h3>Calculator App</h3>
@@ -24,7 +25,7 @@ const Calculator = (props) => {
             onClick={ props.refresh }
         >Clear All</button>
         <div className="calculator-layout">
-            { historyArray }
+            { props.calculator.history.length ? historyArray : <OperationItem key={ 0 } index={ 0 } content={{ input: '', markdown: [], output: '' }} /> }
             <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>
         </>
