@@ -1,22 +1,3 @@
-export const FUNCTIONS_KEYWORDS_LIST = [
-    // conversion
-    'in', 'into', 'as', 'to',
-    // percentages
-    'on', 'of', 'off',
-    // time // ! + in
-    'fromunix',
-    // operations
-    'plus', 'and', 'with', 'minus', 'subtract', 'without', 
-    'times', 'multiplied by', 'mul', 'divide by', 
-    'mod',  // '^', '&', '|', 'xor', '<<', '>>', - to be handled by eval()
-    // number
-    'sci', 'scientific',
-    // Math functions
-    'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor',
-    // Trigonometry
-    'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
-]
-
 export const FUNCTION_GROUPS = {
     'into': [ 'in', 'into', 'as', 'to' ],
     'fromunix': [ 'fromunix' ],
@@ -28,7 +9,7 @@ export const FUNCTION_GROUPS = {
     'sci': [ 'sci', 'scientific' ],
 }
 
-export const functionMap = {
+export const FUNCTION_MAP = {
     in: (x) => { return },
     into: (x) => { return },
     as: (x) => { return },
@@ -44,7 +25,7 @@ export const functionMap = {
     bin: (x) => { return parseFloat(x).toString(2) },
     oct: (x) => { return parseFloat(x).toString(8) },
     sci: (x) => { return parseFloat(x).toExponential(2); }, // 2 is arbitrary value and might be changed
-    // root: (x) => { return }, // TODO: implement
+    // root: (x, y) => { return }, // TODO: implement
     sqrt: (x) => { return Math.sqrt(x) },
     cbrt: (x) => { return Math.cbrt(x) },
     abs: (x) => { return Math.abs(x) },
@@ -52,14 +33,14 @@ export const functionMap = {
     ln: (x) => { return Math.log(x) },
     fact: (x) => { x = parseInt(x, 10);
         if (isNaN(x)) return 1;
-       if (x <= 0) return 1;
+        if (x <= 0) return 1;
         if (x > 170) return Infinity;
         let y = 1;
         for (let i = x; i>0; i--){
             y *= i;
         }
         return y;
-    }, // TODO: implement
+    },
     round: (x) => { return Math.round(x) },
     ceil: (x) => { return Math.ceil(x) },
     floor: (x) => { return Math.floor(x) },

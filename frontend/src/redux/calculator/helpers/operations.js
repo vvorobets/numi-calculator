@@ -1,8 +1,10 @@
 import { updateInput, updateOutput, setVariable, handleError } from '../actions';
-import { FUNCTIONS_KEYWORDS_LIST } from './functions';
+import { FUNCTION_MAP } from './functions';
 import { 
+    FUNCTIONS_KEYWORDS_LIST, 
     MULTI_LINE_OPERATIONS_LIST, NUMBER_SYSTEMS, SCALES, MEASURE_UNITS, CURRENCIES, 
-    oneArgumentFunctionsList, twoArgumentFunctionsList, pureScalesList, extendedMeasureUnitsList, multiWordKeywords
+    oneArgumentFunctionsList, twoArgumentFunctionsList, trigonometryFunctionsList,
+    pureScalesList, extendedMeasureUnitsList, multiWordKeywords
 } from './keywordsLists';
 
 let variables = [], VARIABLES_LIST = [];
@@ -73,7 +75,10 @@ console.log('x is: ', x);
                     else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal: '0b', '0o', '0x'
                         currentUnit = x.concat(input[i+1]);
                         i++;
-                    } else console.error('Left trailing zeros should be omitted');
+                    } else { 
+                        currentUnit = x;
+                        console.error('Left trailing zeros should be omitted');
+                    }
                 }
                 currentCharType = 'number'; break;
             case /[A-Za-z]/.test(x):
@@ -216,7 +221,7 @@ console.log('calc arr: ', arr);
     let stringifiedInput = arr.map(item => item.value).join(' ');
     let testForEval = true
     for (let n of stringifiedInput) {
-        if (!/[\d+-/*|^&<>\s/xob]/.test(n)) testForEval = false;
+        if (!/[()\d+-/*|^&<>\s/xob]/.test(n)) testForEval = false;
     };
 console.log('test for eval', testForEval);
     if (testForEval) {
@@ -234,7 +239,9 @@ console.log('test for eval', testForEval);
         else if (arr[0].type === 'variableName') return variables[arr[0].value];
         else return '';
     }
+
     // handle braces
+
     if (arr.indexOf('(') > -1) {
         let openBracePosition = arr.indexOf('(');
         if (arr.indexOf(')') > -1) {
@@ -251,14 +258,15 @@ console.log('test for eval', testForEval);
         if (arr[i].type === 'operation') {
             if (oneArgumentFunctionsList.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    console.log('TODO: FUNCTIONS[arr[i].value](arr[i+1].value)');
-                    firstOperandValue = 0; // TODO: FUNCTIONS[arr[i].value](arr[i+1].value);
-                }
-                if(arr[i+2] && arr[i+2].type === 'measureUnit' && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
-                    firstOperandType = arr[i+2].value;
-                } else { 
-                    return ''; // these functions don't work with measure units;
-                }
+                    resultValue = FUNCTION_MAP[arr[i].value](arr[i+1].value); // TODO: FUNCTIONS[arr[i].value](arr[i+1].value);
+                    return calculateInput([{ type: 'numberValue', value: resultValue }, ...arr.slice(i+2)])
+                } else return '';
+            } else if (trigonometryFunctionsList.includes(arr[i].value)) {
+                if(arr[i+1] && arr[i+1].type === 'numberValue') {
+                    resultValue = FUNCTION_MAP[arr[i].value](arr[i+1].value); // TODO: FUNCTIONS[arr[i].value](arr[i+1].value);
+                    return calculateInput([{ type: 'numberValue', value: resultValue }, ...arr.slice(i+2)])
+                } else return '';
+
             } else if (twoArgumentFunctionsList.includes(arr[i].value)) { // List for Math functions with two numbers
                 if(arr[i+1] && arr[i+1].type === 'numberValue' && arr[i+2].type === 'numberValue') {
                     console.log('TODO: FUNCTIONS[arr[i].value](arr[i+1].value)');

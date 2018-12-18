@@ -2,6 +2,25 @@ export const MULTI_LINE_OPERATIONS_LIST = [
     'sum', 'total', 'average', 'avg', 
 ];
 
+export const FUNCTIONS_KEYWORDS_LIST = [
+    // conversion
+    'in', 'into', 'as', 'to',
+    // percentages
+    'on', 'of', 'off',
+    // time // ! + in
+    'fromunix',
+    // operations
+    'plus', 'and', 'with', 'minus', 'subtract', 'without', 
+    'times', 'multiplied by', 'mul', 'divide by', 
+    'mod',  // '^', '&', '|', 'xor', '<<', '>>', - to be handled by eval()
+    // number
+    'sci', 'scientific',
+    // Math functions
+    'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor',
+    // Trigonometry
+    'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
+]
+
 export const NUMBER_SYSTEMS = [ 'hex', 'bin', 'oct' ];
 
 export const SCALES = [ 
@@ -50,7 +69,9 @@ export const CURRENCIES = [
     'AFA', 'DASH', 'ETH', 'VTC', 'XBC', 'XBT', 'BTC', 'XLM', 'XMR', 'XRP', 'ZEC', 'BTU', 
 ];
 
-export const oneArgumentFunctionsList = [];
+export const oneArgumentFunctionsList = [ 'sqrt','cbrt','abs','log','ln','fact','round','ceil','floor' ];
+
+export const trigonometryFunctionsList = [ 'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh' ];
 
 export const twoArgumentFunctionsList = []; 
 
