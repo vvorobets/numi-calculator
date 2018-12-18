@@ -9,6 +9,8 @@ export const handleInput = input => (dispatch, getState) => {
 
     const calculateInput = arr => { // type: array
         // test for eval()
+        if (!arr) return '';
+console.log('calc arr: ', arr);
         let stringifiedInput = arr.map(item => item.value).join(' ');
         let testForEval = true
         let pat = /[\d+-/*|^&<>\s/]/;
@@ -99,9 +101,12 @@ export const handleInput = input => (dispatch, getState) => {
         if (input[0] === '') return [{ type: 'error', value: 'Empty input' }];
         if (input[0] === '#') return [{ type: 'header', value: input }];
         if (input.slice(0,2) === '//') return [{ type: 'comment', value: input }];
+
         let currentCharType = '', currentUnit = '', parsedExpression = [];
+
         for (let i = 0; i < input.length; i++) {
             let x = input[i];
+console.log('x is: ', x);
             if (currentCharType === 'comment') {
                 currentUnit += x; 
                 if (x === '"') {
@@ -143,6 +148,7 @@ export const handleInput = input => (dispatch, getState) => {
                         parsedExpression.push(identifyUnit(currentUnit));
                         currentUnit = '';
                     };
+                    parsedExpression.push({ type: 'whitespace', value: ' '});
                     break;
                 case (x==='='):
                     let reducedParsedExpression = parsedExpression.filter(item => {
@@ -179,7 +185,7 @@ export const handleInput = input => (dispatch, getState) => {
                         else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
                         parsedExpression.push({ type: 'operation', value: '+='});
                         i++;
-                    } else parsedExpression.push({ type: 'operation', value: '+' }); // handleAdding(input);
+                    } else parsedExpression.push({ type: 'operation', value: '+' });
                     break;
                 case (x==='-'):
                     if (input[i+1] === '=') {
@@ -266,6 +272,7 @@ export const handleInput = input => (dispatch, getState) => {
             if (currentCharType === 'comment') parsedExpression.push({ type: 'comment', value: currentUnit });
             else parsedExpression.push(identifyUnit(currentUnit));
         };
+        console.log('parsedExpression', parsedExpression);
         return parsedExpression;
     }
     
@@ -303,7 +310,7 @@ export const handleInput = input => (dispatch, getState) => {
 
     let errors = 0, output, reducedMarkdown = [];
     if (markdown) {
-        reducedMarkdown = markdown.map(item => {
+        markdown.forEach(item => {
             if(item.type === 'error')  {
                 errors++;
                 dispatch(handleError(item.value));
@@ -312,10 +319,11 @@ export const handleInput = input => (dispatch, getState) => {
                 errors++;
                 dispatch(handleError('Words provided are no keywords'));
                 
-            } else if (item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' 
-                || item.type === 'operation') {
-                    return item;
-            } // wipe out comments, labels etc
+            }
+        });
+        reducedMarkdown = markdown.map(item => {
+            return (item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' 
+                || item.type === 'operation'); // wipe out comments, labels etc
         });
     };
     if(errors) output = '';
