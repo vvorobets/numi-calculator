@@ -241,15 +241,17 @@ console.log('test for eval', testForEval);
     }
 
     // handle braces
-
-    if (arr.indexOf('(') > -1) {
+    while (arr.indexOf('(') > -1 || arr.indexOf(')') > -1) {
         let openBracePosition = arr.indexOf('(');
-        if (arr.indexOf(')') > -1) {
-            let closingBracePosition = arr.indexOf(')');
-            if (openBracePosition < closingBracePosition) { // calculating inside brackets, recursively if needed
-                arr = [...arr.slice(0, openBracePosition), ...parseInput(calculateInput(...arr.slice(openBracePosition+1, closingBracePosition)), ...arr.slice(closingBracePosition+1))];
-            } else return '';
-        } else return '';
+        if (openBracePosition > -1) {
+            let closingBracePosition = arr.lastIndexOf(')');
+            if (closingBracePosition > -1) {
+                if (openBracePosition < closingBracePosition) { // calculating inside brackets, recursively if needed
+                    return calculateInput([...arr.slice(0, openBracePosition), ...parseInput(calculateInput(...arr.slice(openBracePosition+1, closingBracePosition)), ...arr.slice(closingBracePosition+1))]);
+                }
+            }
+        }
+        return '';
     }
 
     let firstOperandValue = 0, firstOperandType = '', secondOperandValue = 0, secondOperandType = '', resultValue = 0, resultMeasureUnit = '', resultType = '';
@@ -258,26 +260,23 @@ console.log('test for eval', testForEval);
         if (arr[i].type === 'operation') {
             if (oneArgumentFunctionsList.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    resultValue = FUNCTION_MAP[arr[i].value](arr[i+1].value); // TODO: FUNCTIONS[arr[i].value](arr[i+1].value);
-                    return calculateInput([{ type: 'numberValue', value: resultValue }, ...arr.slice(i+2)])
+                    return calculateInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])
                 } else return '';
             } else if (trigonometryFunctionsList.includes(arr[i].value)) {
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    resultValue = FUNCTION_MAP[arr[i].value](arr[i+1].value); // TODO: FUNCTIONS[arr[i].value](arr[i+1].value);
-                    return calculateInput([{ type: 'numberValue', value: resultValue }, ...arr.slice(i+2)])
+                    if(arr[i+2] && arr[i+2].value === '°') {
+                        console.error('Not implemented for now');
+                        // TODO: convert
+                        return calculateInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])
+                    }
+                    return calculateInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)]);
                 } else return '';
-
-            } else if (twoArgumentFunctionsList.includes(arr[i].value)) { // List for Math functions with two numbers
-                if(arr[i+1] && arr[i+1].type === 'numberValue' && arr[i+2].type === 'numberValue') {
-                    console.log('TODO: FUNCTIONS[arr[i].value](arr[i+1].value)');
-                    firstOperandValue = 0; // FUNCTIONS[arr[i].value](arr[i+1].value, arr[i+2].value);
-                }
-                if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
-                    firstOperandType = arr[i+2].value;
-                } else { 
-                    return ''; // these functions don't work with measure units;
-                }
-            }
+            } 
+            // if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
+                //     firstOperandType = arr[i+2].value;
+                // } else { 
+                //     return ''; // these functions don't work with measure units;
+                // }
         } else if (arr[i].type === 'numberValue') {
             firstOperandValue = arr[i].value;
             if (arr[i+1] && arr[i+1].type === 'operation') {
@@ -337,8 +336,7 @@ const identifyUnit = (val) => {
     } else if (NUMBER_SYSTEMS.includes(val) || SCALES.includes(val) || MEASURE_UNITS.includes(val)
         || CURRENCIES.includes(val) || extendedMeasureUnitsList.includes(val)) {
             return { type: 'measureUnit', value: val };
-    }
-    return { type: 'word', value: val };
+    } else return { type: 'word', value: val };
 }
 
 // regExp examples
