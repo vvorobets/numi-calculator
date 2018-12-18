@@ -124,7 +124,9 @@ console.log('x is: ', x);
                     parsedExpression[varIndex] = checkVariableName(reducedParsedExpression[0].value);
                 }
                 parsedExpression.push({ type: 'operation', value: '='});
-                currentUnit = ''; break;
+                currentCharType = '';
+                currentUnit = ''; 
+                break;
             case (x===':'):
                 parsedExpression = [];
                 parsedExpression.push({ type: 'label', value: input.slice(0, i+1) }); 
@@ -163,6 +165,7 @@ console.log('x is: ', x);
                     }
                     parsedExpression.push({ type: 'operation', value: x });
                 }
+                currentCharType = '';
                 break;
             case (x==='.'):
                 if (currentCharType === 'number') currentUnit = currentUnit.concat(x);
@@ -212,10 +215,10 @@ const calculateInput = arr => { // type: array
 console.log('calc arr: ', arr);
     let stringifiedInput = arr.map(item => item.value).join(' ');
     let testForEval = true
-    let pat = /[\d+-/*|^&<>\s/]/;
     for (let n of stringifiedInput) {
-        if (!pat.test(n)) testForEval = false;
+        if (!/[\d+-/*|^&<>\s/xob]/.test(n)) testForEval = false;
     };
+console.log('test for eval', testForEval);
     if (testForEval) {
         try {
             let res = eval(stringifiedInput);
