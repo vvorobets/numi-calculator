@@ -35,3 +35,7 @@ export const handleError = createAction(
     error => error
 );
 
+export const setExchangeRates = createAction(
+    types.SET_EXCHANGE_RATES,
+    exchangeRates => exchangeRates
+);

@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { Switch, Route, Link, Redirect } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
 import { userLogout } from '../../redux/user/actions';
+import { getExchangeRates } from '../../redux/calculator/helpers/getExchangeRates';
 
 // React components
 import Quickstart from './Quickstart';
@@ -14,8 +16,12 @@ import Home from './Home';
 class Dashboard extends Component {
     constructor(props) {
         super(props);
+        this.props.getExchangeRates.bind(this);
+        this.props.userLogout.bind(this);
+    }
 
-        this.handleLogout = this.handleLogout.bind(this);
+    componentDidMount() {
+        this.props.getExchangeRates();
     }
 
     handleLogout(e) {
@@ -52,13 +58,21 @@ class Dashboard extends Component {
     }
 }
 
+Dashboard.propTypes = {
+	user: PropTypes.shape({
+        username: PropTypes.string
+    }),
+    userLogout: PropTypes.func,
+    getExchangeRates: PropTypes.func
+};
+
 const mapStateToProps = ({ user }) => ({
 	user
 });
 
 const DashboardConnected = connect(
 	mapStateToProps,
-	{ userLogout }
+	{ userLogout, getExchangeRates }
 )(Dashboard);
 
 export default DashboardConnected;

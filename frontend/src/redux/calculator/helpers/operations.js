@@ -1,21 +1,22 @@
 import { updateInput, updateOutput, setVariable, handleError } from '../actions';
 import { FUNCTION_MAP } from './functions';
 import { 
-    FUNCTIONS_KEYWORDS_LIST, 
     MULTI_LINE_OPERATIONS_LIST, NUMBER_SYSTEMS, SCALES, MEASURE_UNITS, CURRENCIES, 
-    oneArgumentFunctionsList, twoArgumentFunctionsList, trigonometryFunctionsList,
-    pureScalesList, extendedMeasureUnitsList, multiWordKeywords
+    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST,
+    CONVERSIONS_LIST, PERCENTAGE_LIST, TIME_FUNCTIONS_LIST, ADD_SUBTRACT_LIST, MULTIPLY_DIVIDE_LIST, 
+    KEYWORDS_LIST, extendedMeasureUnitsList, MULTIWORD_KEYWORDS
 } from './keywordsLists';
 
-let variables = [], VARIABLES_LIST = [];
+let variables = [], VARIABLES_LIST = [], exchangeRates = {};
 
 export const handleInput = (rowIndex, input) => (dispatch, getState) => {
 
-    const markdown = parseInput(input); // type: array of parsed input's elements
-    dispatch(updateInput(rowIndex, input, markdown));
-
     variables = getState().calculator.variables;
     VARIABLES_LIST = Object.keys(variables);
+    exchangeRates = getState().calculator.exchangeRates;
+
+    const markdown = parseInput(input); // type: array of parsed input's elements
+    dispatch(updateInput(rowIndex, input, markdown));
 
     let errors = 0, output, reducedMarkdown = [];
     if (markdown) {
@@ -91,12 +92,12 @@ console.log('x is: ', x);
                 break;
             case (x===' '):
                 if (currentUnit) {
-                    if (multiWordKeywords.includes(currentUnit)) {
+                    if (MULTIWORD_KEYWORDS.includes(currentUnit)) {
                         parsedExpression.push({ type: 'operation', value: currentUnit });
                         currentUnit = '';
                     }
                     let isMultiWordKeyword = false;
-                    multiWordKeywords.forEach(item => {
+                    MULTIWORD_KEYWORDS.forEach(item => {
                         if (item.startsWith(currentUnit)) {
                             isMultiWordKeyword = true;
                             return;
@@ -144,7 +145,7 @@ console.log('x is: ', x);
                 if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
                 currentUnit = '"';
                 break;
-            case (/[+*-/]/.test(x)):
+            case (/[+*/-]/.test(x)):
                 if (x === '/' && input[i+1] === '/') { 
                     parsedExpression.push({ type: 'comment', value: '//' }); 
                     parsedExpression.push({ type: 'error', value: 'Usage: // Line comment' });
@@ -161,7 +162,7 @@ console.log('x is: ', x);
                     });
                     if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
-                    parsedExpression.push({ type: 'operation', value: XPathExpression.concat('=')});
+                    parsedExpression.push({ type: 'operation', value: x.concat('=')});
                     i++;
                 } else {
                     if (currentUnit) {
@@ -217,13 +218,11 @@ const calculateInput = arr => { // type: array
     
     // test for eval()
     if (!arr) return '';
-console.log('calc arr: ', arr);
     let stringifiedInput = arr.map(item => item.value).join(' ');
     let testForEval = true
     for (let n of stringifiedInput) {
-        if (!/[()\d+-/*|^&<>\s/xob]/.test(n)) testForEval = false;
+        if (!/[()\d+/*|^&<>\s/xob-]/.test(n)) testForEval = false;
     };
-console.log('test for eval', testForEval);
     if (testForEval) {
         try {
             let res = eval(stringifiedInput);
@@ -235,12 +234,13 @@ console.log('test for eval', testForEval);
     };
 
     if (arr.length === 1) {
-        if (arr[0].type === 'numberValue') return arr[0].value;
+        if (arr[0].type === 'numberValue') return arr[0].value.toString();
         else if (arr[0].type === 'variableName') return variables[arr[0].value];
         else return '';
     }
 
     // handle braces
+    // TODO: braces multiplying, 2 (3) should return 6
     while (arr.indexOf('(') > -1 || arr.indexOf(')') > -1) {
         let openBracePosition = arr.indexOf('(');
         if (openBracePosition > -1) {
@@ -254,15 +254,34 @@ console.log('test for eval', testForEval);
         return '';
     }
 
+    // test exchangeCurrency prototype
+    let operationsToDo = arr.filter(item => item.type === 'operation');
+    if (arr.length === 4 && operationsToDo.length ===1 && operationsToDo[0].subtype === 'conversion' 
+        && arr[3].subtype === 'currency') {
+        let amount = 0, currencyFrom, currencyTo;
+        if (arr[0].type === 'numberValue') {
+            amount = arr[0].value;
+            currencyFrom = arr[1].value;
+        } else if (arr[0].value === '$' || arr[1].type === 'numberValue') {
+            currencyFrom = 'USD';
+            amount = arr[0].value;
+        } else return '';
+        currencyTo = arr[3].value;
+        if (currencyFrom === 'USD') return `${(amount / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
+        else if (currencyTo === 'USD') return `${(amount * exchangeRates[currencyFrom]).toFixed(2)} USD`;
+        else return `${(amount * exchangeRates[currencyFrom] / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
+        // TODO: add cases for '$', uah, dollars, $ CAD, euro etc.
+    }
+
     let firstOperandValue = 0, firstOperandType = '', secondOperandValue = 0, secondOperandType = '', resultValue = 0, resultMeasureUnit = '', resultType = '';
     
     for(let i = 0; i < arr.length; i++) {
         if (arr[i].type === 'operation') {
-            if (oneArgumentFunctionsList.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
+            if (ONE_ARGUMENT_FUNCTIONS_LIST.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
                     return calculateInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])
                 } else return '';
-            } else if (trigonometryFunctionsList.includes(arr[i].value)) {
+            } else if (TRIGONOMETRY_FUNCTIONS_LIST.includes(arr[i].value)) {
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
                     if(arr[i+2] && arr[i+2].value === '°') {
                         console.error('Not implemented for now');
@@ -318,22 +337,45 @@ const checkVariableName = name => {
             return { type: 'error', value: 'Variable name should not contain whitespaces or special characters'};
         }
     }
-    if (MULTI_LINE_OPERATIONS_LIST.includes(name) || FUNCTIONS_KEYWORDS_LIST.includes(name)
-        || NUMBER_SYSTEMS.includes(name) || SCALES.includes(name) || MEASURE_UNITS.includes(name)
-        || CURRENCIES.includes(name) || extendedMeasureUnitsList.includes(name)) {
+    if (KEYWORDS_LIST.includes(name)) {
         return { type: 'error', value: 'Keywords cannot be used as a variable' };
-    } else return { type: 'variableName', value: name }; // TODO: STORE_VARIABLE && (?)SHOW_RESULT
+    } else return { type: 'variableName', value: name }; // TODO: STORE_VARIABLE
 }
 
 const identifyUnit = (val) => {
-    if (!isNaN(parseFloat(val))) return { type: 'numberValue', value: val };
-    else if (MULTI_LINE_OPERATIONS_LIST.includes(val) || FUNCTIONS_KEYWORDS_LIST.includes(val) 
-        || VARIABLES_LIST.includes(val) || multiWordKeywords.includes(val)) { 
-        return { type: 'operation', value: val };
-    } else if (NUMBER_SYSTEMS.includes(val) || SCALES.includes(val) || MEASURE_UNITS.includes(val)
-        || CURRENCIES.includes(val) || extendedMeasureUnitsList.includes(val)) {
+    switch(true) {
+        case !isNaN(parseFloat(val)):
+            return { type: 'numberValue', value: val };
+        case VARIABLES_LIST.includes(val):
+            return { type: 'operation', subtype: 'variable', value: val }; // pattern: func(x)
+        case MULTI_LINE_OPERATIONS_LIST.includes(val):
+            return { type: 'operation', subtype: 'multiLine', value: val }; // x + x... || (x + x...)/length
+        case ONE_ARGUMENT_FUNCTIONS_LIST.includes(val):
+            return { type: 'operation', subtype: 'Math', value: val }; // func(x)
+        case TRIGONOMETRY_FUNCTIONS_LIST.includes(val):
+            return { type: 'operation', subtype: 'trigonometry', value: val }; // func(x) || func(convertToX(y))
+        case CONVERSIONS_LIST.includes(val):
+            return { type: 'operation', subtype: 'conversion', value: val }; // x * yRate
+        case PERCENTAGE_LIST.includes(val):
+            return { type: 'operation', subtype: 'percentage', value: val }; // func(x, y)
+        case TIME_FUNCTIONS_LIST.includes(val):
+            return { type: 'operation', subtype: 'time', value: val }; // func(x)
+        case ADD_SUBTRACT_LIST.includes(val):
+            return { type: 'operation', subtype: 'add-subtract', value: val }; // x + y
+        case MULTIPLY_DIVIDE_LIST.includes(val):
+            return { type: 'operation', subtype: 'multiply-divide', value: val }; // x * y
+        case CURRENCIES.includes(val):
+            return { type: 'measureUnit', subtype: 'currency', value: val };
+        case NUMBER_SYSTEMS.includes(val):
+            return { type: 'measureUnit', subtype: 'numberSystem', value: val };
+        case SCALES.includes(val):
+            return { type: 'measureUnit', subtype: 'scale', value: val };
+        case MEASURE_UNITS.includes(val):
+        case extendedMeasureUnitsList.includes(val):
             return { type: 'measureUnit', value: val };
-    } else return { type: 'word', value: val };
+        default:
+            return { type: 'word', value: val };
+    }
 }
 
 // regExp examples

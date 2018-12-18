@@ -1,16 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
 import { refresh } from '../../../redux/calculator/actions';
-import { getExchangeRates } from '../../../redux/calculator/helpers/getExchangeRates';
 
 // React components
 import OperationItem from './OperationItem';
 
 const Calculator = (props) => {
-
-    props.getExchangeRates();
 
     const historyArray = props.calculator.history.map((item, i) => {
             return <OperationItem 
@@ -35,13 +33,28 @@ const Calculator = (props) => {
     )
 }
 
+Calculator.propTypes = {
+	calculator: PropTypes.shape({
+        history: PropTypes.arrayOf(PropTypes.shape({
+            input: PropTypes.string,
+            markdown: PropTypes.arrayOf(PropTypes.shape({
+                type: PropTypes.string,
+                value: PropTypes.string
+            })),
+            output: PropTypes.string
+        })),
+        errorMessage: PropTypes.string,
+    }),
+    refresh: PropTypes.func
+};
+
 const mapStateToProps = ({ user, calculator }) => ({
 	user, calculator
 });
 
 const CalculatorConnected = connect(
     mapStateToProps,
-    { refresh, getExchangeRates }
+    { refresh }
 )(Calculator);
 
 export default CalculatorConnected;

@@ -1,3 +1,5 @@
+import { setExchangeRates } from '../actions';
+
 export const getExchangeRates = () => dispatch => {
 
     return fetch('http://www.floatrates.com/daily/usd.json', { // https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json
@@ -7,18 +9,17 @@ export const getExchangeRates = () => dispatch => {
             "Content-Type": "application/json; charset=utf-8",
         }
     })
-        .then(response => {
-            console.log('fetched!');
-            response.json();
-        })
+        .then(response => response.json())
         .then(json => { 
-            if (json === 'error') {
-            } else {
+            let exchangeRates = {};
+            for (let key in json) {
+               exchangeRates[json[key].code] = json[key].inverseRate;
             }
+            dispatch(setExchangeRates(exchangeRates));
         })            
         .catch(error => {
             console.error(error);
-            setTimeout(() => getExchangeRates(), 60000)
+            setTimeout(() => getExchangeRates(), 15000)
         })
 }
 

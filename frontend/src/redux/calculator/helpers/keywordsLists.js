@@ -1,27 +1,20 @@
-export const MULTI_LINE_OPERATIONS_LIST = [
-    'sum', 'total', 'average', 'avg', 
-];
+export const MULTI_LINE_OPERATIONS_LIST = [ 'sum', 'total', 'average', 'avg' ];
 
-export const FUNCTIONS_KEYWORDS_LIST = [
-    // conversion
-    'in', 'into', 'as', 'to',
-    // percentages
-    'on', 'of', 'off',
-    // time // ! + in
-    'fromunix',
-    // operations
-    'plus', 'and', 'with', 'minus', 'subtract', 'without', 
-    'times', 'multiplied by', 'mul', 'divide by', 
-    'mod',  // '^', '&', '|', 'xor', '<<', '>>', - to be handled by eval()
-    // number
-    'sci', 'scientific',
-    // Math functions
-    'root','sqrt','cbrt','abs','log','ln','fact','round','ceil','floor',
-    // Trigonometry
-    'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh',
-]
+export const CONVERSIONS_LIST = [ 'in', 'into', 'as', 'to' ]; 
 
-export const NUMBER_SYSTEMS = [ 'hex', 'bin', 'oct' ];
+export const ADD_SUBTRACT_LIST = [ '+', '-', '+=', '-=', 'plus', 'and', 'with', 'minus', 'subtract', 'without' ];
+
+export const MULTIPLY_DIVIDE_LIST = [ 'mod', '*', '/', '*=', '/=', 'times', 'multiplied by', 'mul', 'divide by' ];
+
+export const PERCENTAGE_LIST = [ 'on', 'off', 'on what is', 'off what is', 'of', 'of what is', ]; // 'as a'
+
+export const ONE_ARGUMENT_FUNCTIONS_LIST = [ 'sqrt','cbrt','abs','log','ln','fact','round','ceil','floor' ];
+
+export const TRIGONOMETRY_FUNCTIONS_LIST = [ 'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh' ];
+
+export const TIME_FUNCTIONS_LIST = [ 'fromunix' ]; // ! + in 
+
+export const NUMBER_SYSTEMS = [ 'hex', 'bin', 'oct', 'sci', 'scientific' ];
 
 export const SCALES = [ 
     'thousand', 'million', 'billion', 
@@ -51,7 +44,7 @@ export const MEASURE_UNITS = [
 ];
 
 export const CURRENCIES = [
-    '$', 'euro', 'euros', 'roubles', 'hryvnias',
+    '$', 'euro', 'euros', 'roubles', 'hryvnias', 'eur',
     // currencies
     'AED', 'AFN', 'ALL', 'AMD', 'ANG', 'AOA', 'ARS', 'AUD', 'AWG', 'AZN', 
     'BAM', 'BBD', 'BDT', 'BGN', 'BHD', 'BIF', 'BMD', 'BND', 'BOB', 'BOV', 'BRL', 'BSD', 'BTN', 'BWP', 'BYN', 'BZD',
@@ -69,16 +62,13 @@ export const CURRENCIES = [
     'AFA', 'DASH', 'ETH', 'VTC', 'XBC', 'XBT', 'BTC', 'XLM', 'XMR', 'XRP', 'ZEC', 'BTU', 
 ];
 
-export const oneArgumentFunctionsList = [ 'sqrt','cbrt','abs','log','ln','fact','round','ceil','floor' ];
-
-export const trigonometryFunctionsList = [ 'sin','cos','tan','arcsin','arccos','arctan','sinh','cosh','tanh' ];
-
-export const twoArgumentFunctionsList = []; 
-
-export const pureScalesList = [];
+export const KEYWORDS_LIST = [ 
+    ...MULTI_LINE_OPERATIONS_LIST, ...CONVERSIONS_LIST, ...ADD_SUBTRACT_LIST, ...MULTIPLY_DIVIDE_LIST, 
+    ...PERCENTAGE_LIST, ...ONE_ARGUMENT_FUNCTIONS_LIST, ...TRIGONOMETRY_FUNCTIONS_LIST,
+    ...TIME_FUNCTIONS_LIST, ...NUMBER_SYSTEMS, ...SCALES, ...MEASURE_UNITS, ...CURRENCIES ];
 
 export const extendedMeasureUnitsList = []; // TODO: combine scales & SI units
 
-export const multiWordKeywords = [ 'nautical mile', 'nautical miles', 'tea spoon', 'tea spoons', 'table spoon', 'table spoons',
+export const MULTIWORD_KEYWORDS = [ 'nautical mile', 'nautical miles', 'tea spoon', 'tea spoons', 'table spoon', 'table spoons',
     'multiplied by', 'divide by', 'as a', 'of what is', 'on what is', 'off what is' ];
 // 'as a % of', 'as a % on', 'as a % off', '% of what is', '% on what is', '% off what is'
