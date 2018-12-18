@@ -12,6 +12,11 @@ export const updateOutput = createAction(
     (index, output) => ({ index, output })
 );
 
+export const setVariable = createAction( 
+    types.SET_VARIABLE,
+    variable => variable
+);
+
 export const addLine = createAction( 
     types.ADD_LINE,
 );
