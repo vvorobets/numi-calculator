@@ -14,7 +14,7 @@ export const updateOutput = createAction(
 
 export const setVariable = createAction( 
     types.SET_VARIABLE,
-    variable => variable
+    (name, value) => ({ name, value })
 );
 
 export const addLine = createAction( 

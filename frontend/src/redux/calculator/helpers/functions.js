@@ -49,7 +49,16 @@ export const functionMap = {
     abs: (x) => { return Math.abs(x) },
     log: (x) => { return Math.log2(x) },
     ln: (x) => { return Math.log(x) },
-    fact: (x) => { return }, // TODO: implement
+    fact: (x) => { x = parseInt(x, 10);
+        if (isNaN(x)) return 1;
+       if (x <= 0) return 1;
+        if (x > 170) return Infinity;
+        let y = 1;
+        for (let i = x; i>0; i--){
+            y *= i;
+        }
+        return y;
+    }, // TODO: implement
     round: (x) => { return Math.round(x) },
     ceil: (x) => { return Math.ceil(x) },
     floor: (x) => { return Math.floor(x) },

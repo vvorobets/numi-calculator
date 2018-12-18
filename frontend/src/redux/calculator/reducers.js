@@ -9,7 +9,7 @@ const defaultState = {
         markdown: [],
         output: '' 
     }],
-    variables: [{ name: 'Pi', value: Math.PI }, { name: 'E', value: Math.E }],
+    variables: { 'Pi': Math.PI , 'E': Math.E },
     errorMessage: null 
 };
 
@@ -31,7 +31,7 @@ const calculator = handleActions({
             ...state.history.slice(action.payload.index + 1) 
         ]
     }),
-    [types.SET_VARIABLE]: (state, action) => ({ ...state, variables: [ ...state.variables, action.payload ]}),
+    [types.SET_VARIABLE]: (state, action) => ({ ...state, variables: { ...state.variables, [action.payload.name]: action.payload.value }}),
     [types.HANDLE_ERROR]: (state, action) => ({ ...state, errorMessage: action.payload }),
     [types.ADD_LINE]: (state) => ({ ...state, history: [ ...state.history, { input: '', markdown: [], output: '' }], errorMessage: '' }),
     [types.DELETE_LINE]: (state, action) => ({ ...state, history: [ ...state.history.slice(0, action.payload), ...state.history.slice(action.payload + 1) ]}),

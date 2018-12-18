@@ -5,12 +5,15 @@ import {
     oneArgumentFunctionsList, twoArgumentFunctionsList, pureScalesList, extendedMeasureUnitsList, multiWordKeywords
 } from './keywordsLists';
 
-let variables = [];
+let variables = [], VARIABLES_LIST = [];
 
 export const handleInput = (rowIndex, input) => (dispatch, getState) => {
 
     const markdown = parseInput(input); // type: array of parsed input's elements
     dispatch(updateInput(rowIndex, input, markdown));
+
+    variables = getState().calculator.variables;
+    VARIABLES_LIST = Object.keys(variables);
 
     let errors = 0, output, reducedMarkdown = [];
     if (markdown) {
@@ -24,7 +27,7 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
                 dispatch(handleError('Words provided are no keywords'));
                 
             } else if (item.type === 'variableName') {
-                dispatch(setVariable(item));
+                dispatch(setVariable(item.value, 'testValue'));
             }
         });
         reducedMarkdown = markdown.filter(item => {
@@ -32,8 +35,6 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
                 || item.type === 'operation'); // wipe out comments, labels etc
         });
     };
-    variables = getState().calculator.variables;
-
     if(errors) output = '';
     else if (reducedMarkdown) output = calculateInput(reducedMarkdown); // type: string - result value
     dispatch(updateOutput(rowIndex, output));
@@ -59,6 +60,7 @@ console.log('x is: ', x);
             }
             continue;
         };
+
         switch(true) {
             case /\d/.test(x):
                 if (currentCharType === 'number') currentUnit = currentUnit.concat(x); // continue writing current number
@@ -70,22 +72,18 @@ console.log('x is: ', x);
                     if (x !== '0') currentUnit = x;
                     else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal: '0b', '0o', '0x'
                         currentUnit = x.concat(input[i+1]);
-                        i++; console.log('i++');
-                    } else console.error('Left trailing zeros are omitted');
+                        i++;
+                    } else console.error('Left trailing zeros should be omitted');
                 }
                 currentCharType = 'number'; break;
             case /[A-Za-z]/.test(x):
                 if (currentCharType === 'letter') currentUnit = currentUnit.concat(x);
                 else {
-                    if (currentCharType) {
-                        if (currentUnit) {
-                            parsedExpression.push(identifyUnit(currentUnit));
-                            currentUnit = '';
-                        };
-                    }
+                    if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
                     currentUnit = x;
+                    currentCharType = 'letter';
                 }
-                if (currentCharType !== 'comment') currentCharType = 'letter'; break;
+                break;
             case (x===' '):
                 if (currentUnit) {
                     parsedExpression.push(identifyUnit(currentUnit));
@@ -220,7 +218,6 @@ console.log('x is: ', x);
 }
 
 const calculateInput = arr => { // type: array
-    console.log('variables', variables);
     // test for eval()
     if (!arr) return '';
 console.log('calc arr: ', arr);
@@ -332,9 +329,9 @@ const checkVariableName = name => {
 
 const identifyUnit = (val) => {
     if (!isNaN(parseFloat(val))) return { type: 'numberValue', value: val };
-    else if (MULTI_LINE_OPERATIONS_LIST.includes(val)) return { type: 'operation', value: val };
-    else if (FUNCTIONS_KEYWORDS_LIST.includes(val)) return { type: 'operation', value: val };
-    else if (NUMBER_SYSTEMS.includes(val) || SCALES.includes(val) || MEASURE_UNITS.includes(val)
+    else if (MULTI_LINE_OPERATIONS_LIST.includes(val) || FUNCTIONS_KEYWORDS_LIST.includes(val) || VARIABLES_LIST.includes(val)) { 
+        return { type: 'operation', value: val };
+    } else if (NUMBER_SYSTEMS.includes(val) || SCALES.includes(val) || MEASURE_UNITS.includes(val)
         || CURRENCIES.includes(val) || extendedMeasureUnitsList.includes(val)) {
             return { type: 'measureUnit', value: val };
     }
