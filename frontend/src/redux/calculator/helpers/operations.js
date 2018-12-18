@@ -31,8 +31,8 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
             }
         });
         reducedMarkdown = markdown.filter(item => {
-            return (item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'variableName' 
-                || item.type === 'operation'); // wipe out comments, labels etc
+            return (item.type === 'numberValue' || item.type === 'measureUnit' 
+                || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
         });
     };
     if(errors) output = '';
@@ -86,18 +86,35 @@ console.log('x is: ', x);
                 break;
             case (x===' '):
                 if (currentUnit) {
-                    parsedExpression.push(identifyUnit(currentUnit));
-                    currentUnit = '';
+                    let isMultiWordKeyword = false;
+                    multiWordKeywords.forEach(item => {
+                        if (item.startsWith(currentUnit)) {
+                            isMultiWordKeyword = true;
+                            return;
+                        }
+                    });
+                    if (isMultiWordKeyword) {
+                        currentUnit = currentUnit.concat(x);
+                        break;
+                    } else {
+                        parsedExpression.push(identifyUnit(currentUnit));
+                        currentUnit = '';
+                    }
                 };
                 parsedExpression.push({ type: 'whitespace', value: ' '});
                 break;
             case (x==='='):
+                if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
                 let reducedParsedExpression = parsedExpression.filter(item => {
                     return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
                     || item.type === 'operation' || item.type === 'variableName';
                 });
                 if (reducedParsedExpression.length !==1 && reducedParsedExpression[0].type !== 'word') parsedExpression.push({ type: 'error', value: 'Usage: [varName] = [value]' });
-                else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
+                else {
+                    parsedExpression.map(item => {
+                        if (item.type === 'word') item = checkVariableName(item.value);
+                    })
+                }
                 parsedExpression.push({ type: 'operation', value: '='});
                 currentUnit = ''; break;
             case (x===':'):
@@ -126,7 +143,13 @@ console.log('x is: ', x);
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
                     parsedExpression.push({ type: 'operation', value: '+='});
                     i++;
-                } else parsedExpression.push({ type: 'operation', value: '+' });
+                } else {
+                    if (currentUnit) {
+                        parsedExpression.push(identifyUnit(currentUnit));
+                        currentUnit = '';
+                    }
+                    parsedExpression.push({ type: 'operation', value: '+' });
+                }
                 break;
             case (x==='-'):
                 if (input[i+1] === '=') {
@@ -142,7 +165,13 @@ console.log('x is: ', x);
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
                     parsedExpression.push({ type: 'operation', value: '-='});
                     i++;
-                } else parsedExpression.push({ type: 'operation', value: '-' }); // handleSubtracting(input);
+                }  else {
+                    if (currentUnit) {
+                        parsedExpression.push(identifyUnit(currentUnit));
+                        currentUnit = '';
+                    }
+                    parsedExpression.push({ type: 'operation', value: '-' });
+                }
                 break;
             case (x==='*'):
                 if (input[i+1] === '=') {
@@ -158,7 +187,13 @@ console.log('x is: ', x);
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
                     parsedExpression.push({ type: 'operation', value: '*='});
                     i++;
-                } else parsedExpression.push({ type: 'operation', value: '*' }); // handleMultiplying(input);
+                } else  {
+                    if (currentUnit) {
+                        parsedExpression.push(identifyUnit(currentUnit));
+                        currentUnit = '';
+                    }
+                    parsedExpression.push({ type: 'operation', value: '*' });
+                }
                 break;
             case (x==='/'):
                 if (input[i+1] === '/') parsedExpression.push({ type: 'error', value: 'Usage: // Line comment' }); 
@@ -175,7 +210,13 @@ console.log('x is: ', x);
                     else parsedExpression[parsedExpression.length-1] = checkVariableName(reducedParsedExpression[0].value);
                     parsedExpression.push({ type: 'operation', value: '+='});
                     i++;
-                } else parsedExpression.push({ type: 'operation', value: '/' }); // handleDividing(input);
+                }  else {
+                    if (currentUnit) {
+                        parsedExpression.push(identifyUnit(currentUnit));
+                        currentUnit = '';
+                    }
+                    parsedExpression.push({ type: 'operation', value: '/' });
+                }
                 break;
             case (x==='.'):
                 if (currentCharType === 'number') currentUnit = currentUnit.concat(x);
@@ -198,14 +239,19 @@ console.log('x is: ', x);
                 parsedExpression.push({ type: 'operation', value: '&' }); break;
             case (x==='>'): 
                 currentCharType = '';
-                if (input[i+1] === '>') parsedExpression.push({ type: 'operation', value: '>>' });
-                else parsedExpression.push({ type: 'error', value: 'Do you mean bitwise >> ?' });  
+                if (input[i+1] === '>') {
+                    parsedExpression.push({ type: 'operation', value: '>>' });
+                    i++
+                } else parsedExpression.push({ type: 'word', value: '>' });  
                 break;
             case (x==='<'): 
-            if (input[i+1] === '<') parsedExpression.push({ type: 'operation', value: '<<' });
-            else parsedExpression.push({ type: 'error', value: 'Do you mean bitwise << ?' });  
-            break;
-        default:
+                if (input[i+1] === '<') {
+                    parsedExpression.push({ type: 'operation', value: '<<' });
+                    i++;
+                }
+                else parsedExpression.push({ type: 'word', value: '<' });  
+                break;
+            default:
                 continue;
         }
     }
@@ -239,7 +285,7 @@ console.log('calc arr: ', arr);
 
     if (arr.length === 1) {
         if (arr[0].type === 'numberValue') return arr[0].value;
-        else if (arr[0].type === 'variableName') return arr[0].value; // TODO: get value
+        else if (arr[0].type === 'variableName') return variables[arr[0].value];
         else return '';
     }
     // handle braces
@@ -329,7 +375,8 @@ const checkVariableName = name => {
 
 const identifyUnit = (val) => {
     if (!isNaN(parseFloat(val))) return { type: 'numberValue', value: val };
-    else if (MULTI_LINE_OPERATIONS_LIST.includes(val) || FUNCTIONS_KEYWORDS_LIST.includes(val) || VARIABLES_LIST.includes(val)) { 
+    else if (MULTI_LINE_OPERATIONS_LIST.includes(val) || FUNCTIONS_KEYWORDS_LIST.includes(val) 
+        || VARIABLES_LIST.includes(val) || multiWordKeywords.includes(val)) { 
         return { type: 'operation', value: val };
     } else if (NUMBER_SYSTEMS.includes(val) || SCALES.includes(val) || MEASURE_UNITS.includes(val)
         || CURRENCIES.includes(val) || extendedMeasureUnitsList.includes(val)) {
