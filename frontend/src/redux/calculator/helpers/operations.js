@@ -274,9 +274,6 @@ console.log('test for eval', testForEval);
             } 
             // if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
                 //     firstOperandType = arr[i+2].value;
-                // } else { 
-                //     return ''; // these functions don't work with measure units;
-                // }
         } else if (arr[i].type === 'numberValue') {
             firstOperandValue = arr[i].value;
             if (arr[i+1] && arr[i+1].type === 'operation') {
