@@ -20,7 +20,7 @@ export const renderMarkdown = markdown => { // markdown is array
             case 'word':
                 return <span className="operation-item__markdown--numberValue" key={i}>{item.value}</span>;
             case 'error':
-                return <span className="operation-item__markdown--error" key={i}>{item.value}</span>;
+                return <span key={i}></span>;
             case 'whitespace':
                 return <span key={i}> </span>;
             default:
