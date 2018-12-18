@@ -5,7 +5,7 @@ import {
     oneArgumentFunctionsList, twoArgumentFunctionsList, pureScalesList, extendedMeasureUnitsList, multiWordKeywords
 } from './keywordsLists';
 
-export const handleInput = input => (dispatch, getState) => {
+export const handleInput = (rowIndex, input) => (dispatch, getState) => {
 
     const calculateInput = arr => { // type: array
         // test for eval()
@@ -306,7 +306,7 @@ console.log('x is: ', x);
     }
 
     const markdown = parseInput(input); // type: array of parsed input's elements
-    dispatch(updateInput(input, markdown));
+    dispatch(updateInput(rowIndex, input, markdown));
 
     let errors = 0, output, reducedMarkdown = [];
     if (markdown) {
@@ -328,7 +328,7 @@ console.log('x is: ', x);
     };
     if(errors) output = '';
     else if (reducedMarkdown) output = calculateInput(reducedMarkdown); // type: string - result value
-    dispatch(updateOutput(output));
+    dispatch(updateOutput(rowIndex, output));
 
 };
 

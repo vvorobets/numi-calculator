@@ -4,30 +4,23 @@ import types from './types';
 
 export const updateInput = createAction(
     types.UPDATE_INPUT,
-    (input, markdown) => ({ input, markdown })
+    (index, input, markdown) => ({ index, input, markdown })
 );
 
 export const updateOutput = createAction(
     types.UPDATE_OUTPUT,
-    output => output
+    (index, output) => ({ index, output })
 );
 
-// this one also creates new row and cleans current input
-export const calculate = createAction( 
-    types.CALCULATE,
-    (input, markdown, output) => ({ input, markdown, output })
+export const addLine = createAction( 
+    types.ADD_LINE,
 );
 
-export const deleteOne = createAction(
-    types.DELETE_ONE,
+export const deleteLine = createAction(
+    types.DELETE_LINE,
     index => index
 );
 
-export const copyOne = createAction(
-    types.COPY_ONE,
-    updates => updates
-);
-  
 export const refresh = createAction(
     types.REFRESH
 );

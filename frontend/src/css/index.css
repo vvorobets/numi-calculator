@@ -169,7 +169,7 @@ body {
 .operation-item__input-background {
   position: absolute;
   z-index: 1;
-  width: calc(82% - 16.4rem);
+  width: calc(75% - 16.4rem);
   border: 1px solid #685972;
   background-color: #fff;
   overflow: auto;
@@ -215,7 +215,7 @@ body {
   position: absolute;
   display: block;
   z-index: 2;
-  width: calc(82% - 16.4rem);
+  width: calc(75% - 16.4rem);
   margin: 0;
   padding: .25rem;
   border: 1px solid #999999;

@@ -5,16 +5,14 @@ import { connect } from 'react-redux';
 import { refresh } from '../../../redux/calculator/actions';
 
 // React components
-import OperationInput from './OperationInput';
-import OperationHistoryItem from './OperationHistoryItem';
+import OperationItem from './OperationItem';
 
 const Calculator = (props) => {
     const historyArray = props.calculator.history.map((item, i) => { 
-        return <OperationHistoryItem 
+        return <OperationItem 
             key={ i }
             index={ i } // to get key from the props
-            input={ item.input }
-            output={ item.output }
+            content={ item }
         /> 
     });
     
@@ -27,7 +25,6 @@ const Calculator = (props) => {
         >Clear All</button>
         <div className="calculator-layout">
             { historyArray }
-            <OperationInput />
             <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>
         </>

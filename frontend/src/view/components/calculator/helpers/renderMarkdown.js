@@ -1,7 +1,7 @@
 import React from 'react';
 
-export const renderMarkdown = text => { // text is array
-    return text.map( (item, i) => {
+export const renderMarkdown = markdown => { // markdown is array
+    return markdown.map( (item, i) => {
         switch(item.type) {
             case 'header':
                 return <span className="operation-item__markdown--header" key={i}>{item.value.toUpperCase()}</span>;
