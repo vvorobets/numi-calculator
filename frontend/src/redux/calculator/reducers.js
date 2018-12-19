@@ -8,7 +8,7 @@ const defaultState = {
         markdown: [],
         output: '' 
     }],
-    variables: { 'Pi': Math.PI , 'E': Math.E },
+    variables: { 'Pi': Math.PI , 'E': Math.E, 'ppi': 96 },
     errorMessage: '',
     exchangeRates: {}
 };
