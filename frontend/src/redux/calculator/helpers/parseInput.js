@@ -74,7 +74,7 @@ export const parseInput = (input) => {
                     currentUnit = '';
                     currentCharType = '';
                 }
-                parsedExpression.push({ type: 'operation', value: '='});
+                parsedExpression.push({ type: 'operation', subtype: 'assign', value: '='});
                 break;
             case (/[+*/-]/.test(x)):
                 if (currentUnit) {
@@ -88,10 +88,11 @@ export const parseInput = (input) => {
                     i++;
                 }
                 else if (input[i+1] === '=') {
-                    parsedExpression.push({ type: 'operation', value: x.concat('=')});
+                    parsedExpression.push({ type: 'operation', subtype: 'assign', value: x.concat('=')});
                     i++;
                 } else {
-                    parsedExpression.push({ type: 'operation', value: x });
+                    if (x==='+' || x==='-') parsedExpression.push({ type: 'operation', subtype: 'add-subtract', value: x });
+                    else parsedExpression.push({ type: 'operation', subtype: 'multiply-divide', value: x });
                 }
                 break;
             case (x===':'):
@@ -175,7 +176,6 @@ export const parseInput = (input) => {
         if (currentCharType === 'comment') parsedExpression.push({ type: 'comment', value: currentUnit });
         else parsedExpression.push(identifyUnit(currentUnit));
     };
-    console.log('parsedExpression', parsedExpression);
     return parsedExpression;
 }
 

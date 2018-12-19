@@ -41,7 +41,7 @@ export const calculateParsedInput = arr => (dispatch, getState) => { // type: ar
             let closingBracePosition = arr.lastIndexOf(')');
             if (closingBracePosition > -1) {
                 if (openBracePosition < closingBracePosition) { // calculating inside brackets, recursively if needed
-                    return calculateParsedInput([...arr.slice(0, openBracePosition), ...parseInput(calculateParsedInput(...arr.slice(openBracePosition+1, closingBracePosition)), ...arr.slice(closingBracePosition+1))]);
+                    return calculateParsedInput([...arr.slice(0, openBracePosition), ...parseInput(calculateParsedInput(...arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState), ...arr.slice(closingBracePosition+1))])(dispatch, getState);
                 }
             }
         }
@@ -73,16 +73,16 @@ export const calculateParsedInput = arr => (dispatch, getState) => { // type: ar
         if (arr[i].type === 'operation') {
             if (ONE_ARGUMENT_FUNCTIONS_LIST.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])
+                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState)
                 } else return '';
             } else if (TRIGONOMETRY_FUNCTIONS_LIST.includes(arr[i].value)) {
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
                     if(arr[i+2] && arr[i+2].value === '°') {
                         console.error('Not implemented for now');
                         // TODO: convert
-                        return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])
+                        return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])(dispatch, getState)
                     }
-                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)]);
+                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState);
                 } else return '';
             } 
             // if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
@@ -118,6 +118,7 @@ export const calculateParsedInput = arr => (dispatch, getState) => { // type: ar
             return resultValue.toString();
         }
     }
+    return '';
 }
 
 
@@ -132,3 +133,4 @@ export const calculateParsedInput = arr => (dispatch, getState) => { // type: ar
 //     call = /(^)@hello(\s|$)/
 // }
 
+    // dispatch(setVariable(item.value, 'testValue'));
