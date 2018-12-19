@@ -6,7 +6,7 @@ export const ADD_SUBTRACT_LIST = [ '+', '-', '+=', '-=', 'plus', 'and', 'with', 
 
 export const MULTIPLY_DIVIDE_LIST = [ 'mod', '*', '/', '*=', '/=', 'times', 'multiplied by', 'mul', 'divide by' ];
 
-export const PERCENTAGE_LIST = [ 'on', 'off', 'on what is', 'off what is', 'of', 'of what is', ]; // 'as a'
+export const PERCENTAGE_LIST = [ '%', 'as a % of', 'as a % on', 'as a % off', 'of what is', 'on what is', 'off what is' ];
 
 export const ONE_ARGUMENT_FUNCTIONS_LIST = [ 'sqrt','cbrt','abs','log','ln','fact','round','ceil','floor' ];
 
@@ -70,5 +70,4 @@ export const KEYWORDS_LIST = [
 export const extendedMeasureUnitsList = []; // TODO: combine scales & SI units
 
 export const MULTIWORD_KEYWORDS = [ 'nautical mile', 'nautical miles', 'tea spoon', 'tea spoons', 'table spoon', 'table spoons',
-    'multiplied by', 'divide by', 'as a', 'of what is', 'on what is', 'off what is' ];
-// 'as a % of', 'as a % on', 'as a % off', '% of what is', '% on what is', '% off what is'
+    'multiplied by', 'divide by', 'as a % of', 'as a % on', 'as a % off', 'of what is', 'on what is', 'off what is' ];

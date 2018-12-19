@@ -81,7 +81,8 @@ console.log('x is: ', x);
                         console.error('Left trailing zeros should be omitted');
                     }
                 }
-                currentCharType = 'number'; break;
+                currentCharType = 'number'; 
+                break;
             case /[A-Za-z]/.test(x):
                 if (currentCharType === 'letter') currentUnit = currentUnit.concat(x);
                 else {
@@ -91,30 +92,32 @@ console.log('x is: ', x);
                 }
                 break;
             case (x===' '):
-                if (currentUnit) {
-                    if (MULTIWORD_KEYWORDS.includes(currentUnit)) {
-                        parsedExpression.push({ type: 'operation', value: currentUnit });
-                        currentUnit = '';
-                    }
-                    let isMultiWordKeyword = false;
+                if (currentCharType === 'letter') {
+                    let maybeMultiWordKeyword = false;
                     MULTIWORD_KEYWORDS.forEach(item => {
-                        if (item.startsWith(currentUnit)) {
-                            isMultiWordKeyword = true;
+                        if (item.startsWith(currentUnit.concat(x).concat(input[i+1]))) {
+                            maybeMultiWordKeyword = true;
                             return;
                         }
                     });
-                    if (isMultiWordKeyword) {
+                    if (maybeMultiWordKeyword) {
                         currentUnit = currentUnit.concat(x);
                         break;
-                    } else {
-                        parsedExpression.push(identifyUnit(currentUnit));
-                        currentUnit = '';
                     }
-                };
+                }
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
                 parsedExpression.push({ type: 'whitespace', value: ' '});
                 break;
             case (x==='='):
-                if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
                 let reducedParsedExpression = parsedExpression.filter(item => {
                     return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
                     || item.type === 'operation' || item.type === 'variableName';
@@ -130,20 +133,6 @@ console.log('x is: ', x);
                     parsedExpression[varIndex] = checkVariableName(reducedParsedExpression[0].value);
                 }
                 parsedExpression.push({ type: 'operation', value: '='});
-                currentCharType = '';
-                currentUnit = ''; 
-                break;
-            case (x===':'):
-                parsedExpression = [];
-                parsedExpression.push({ type: 'label', value: input.slice(0, i+1) }); 
-                currentUnit = ''; break;
-            case (x==='#'):
-                if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
-                parsedExpression.push({ type: 'error', value: 'Usage: #Header' }); break;
-            case (x==='"'):
-                currentCharType = 'comment';
-                if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
-                currentUnit = '"';
                 break;
             case (/[+*/-]/.test(x)):
                 if (x === '/' && input[i+1] === '/') { 
@@ -155,6 +144,7 @@ console.log('x is: ', x);
                     if (currentUnit) {
                         parsedExpression.push(identifyUnit(currentUnit));
                         currentUnit = '';
+                        currentCharType = '';
                     }
                     let reducedParsedExpression = parsedExpression.filter(item => {
                         return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
@@ -173,24 +163,70 @@ console.log('x is: ', x);
                 }
                 currentCharType = '';
                 break;
+            case (x===':'):
+                parsedExpression = [];
+                parsedExpression.push({ type: 'label', value: input.slice(0, i+1) }); 
+                if (currentUnit) {
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                break;
+            case (x==='#'):
+            if (currentUnit) {
+                parsedExpression.push(identifyUnit(currentUnit));
+                currentUnit = '';
+                currentCharType = '';
+            }
+            parsedExpression.push({ type: 'error', value: 'Usage: #Header' }); 
+                break;
+            case (x==='"'):
+                currentCharType = 'comment';
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                currentUnit = '"';
+                break;
             case (x==='.'):
                 if (currentCharType === 'number') currentUnit = currentUnit.concat(x);
                 else parsedExpression.push({ type: 'error', value: 'Dots allowed within float point numbers only' });
                 break;
-            case (/[%$]/.test(x)): 
+            case (x==='%'): 
+                if (currentCharType === 'letter') {
+                    let maybeMultiWordKeyword = false;
+                    MULTIWORD_KEYWORDS.forEach(item => {
+                        if (item.startsWith(currentUnit.concat(x).concat(input[i+1]))) {
+                            maybeMultiWordKeyword = true;
+                            return;
+                        }
+                    });
+                    if (maybeMultiWordKeyword) {
+                        currentUnit = currentUnit.concat(x);
+                        break;
+                    }
+                }
                 if (currentUnit) {
                     parsedExpression.push(identifyUnit(currentUnit));
                     currentUnit = '';
+                    currentCharType = '';
                 }
-                if (currentCharType) currentCharType = '';
-                parsedExpression.push({ type: 'measureUnit', value: x }); 
+                parsedExpression.push({ type: 'measureUnit', subtype: 'percentage', value: '%' }); 
+                break;
+            case (x==='$'): 
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                parsedExpression.push({ type: 'measureUnit', subtype: 'currency', value: '$' }); 
                 break;
             case (/[()^&|]/.test(x)): 
                 if (currentUnit) {
                     parsedExpression.push(identifyUnit(currentUnit));
                     currentUnit = '';
+                    currentCharType = '';
                 }
-                currentCharType = '';
                 parsedExpression.push({ type: 'operation', value: x }); 
                 break;
             case (/[<>]/.test(x)): 
