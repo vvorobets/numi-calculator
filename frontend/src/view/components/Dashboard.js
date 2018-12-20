@@ -16,8 +16,7 @@ import Home from './Home';
 class Dashboard extends Component {
     constructor(props) {
         super(props);
-        this.props.getExchangeRates.bind(this);
-        this.props.userLogout.bind(this);
+        this.handleLogout = this.handleLogout.bind(this);
     }
 
     componentDidMount() {

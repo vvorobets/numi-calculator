@@ -1,11 +1,11 @@
 import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
-export const parseInput = (input) => {
+export const parseInput = input => {
 console.log('input', input);
-    if (input === '') return [{ type: 'error', value: 'Empty input' }];
+    if (!input.length) return [{ type: 'error', value: 'Empty input' }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
-    if (input[0] === '//' && input[1] === '//') return [{ type: 'comment', value: input }];
+    if (input.length > 1 && input.startsWith('//')) { console.log('line comment'); return [{ type: 'comment', value: input }];}
 
     let currentCharType = '', currentUnit = '', parsedExpression = [];
 

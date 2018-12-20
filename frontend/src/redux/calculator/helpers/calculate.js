@@ -70,7 +70,7 @@ console.log('arr with reduced vars', arr);
                 return `${arr[0].value} ${arr[1].value}`;
         // $ [arg1]
         } else if (arr[0].value === '$' && arr[1].type === 'numberValue') {
-            return `${arr[1].value}`;
+            return `$${arr[1].value}`;
 
         // [function] (arg1)
         } else if (arr[0].subtype === 'Math' || arr[0].subtype === 'trigonometry' || arr[0].value === 'fromunix') {
@@ -82,6 +82,7 @@ console.log('arr with reduced vars', arr);
 console.log('len 3');
         // simple two-operands operations [arg1] [operation] [arg2]
         if (arr[0].type === 'numberValue' && arr[0].type === 'numberValue') {
+console.log('case3.1 [arg1] [operation] [arg2]');
             if (arr[1].subtype === 'add' || arr[1].subtype === 'subtract' 
                 || arr[1].subtype === 'multiply' || arr[1].subtype === 'multiply-divide') {
                 return FUNCTION_MAP[arr[1].subtype](+arr[0].value, +arr[2].value).toString();
@@ -90,27 +91,35 @@ console.log('len 3');
             }
         // $ [arg1] [quantifier]
         } else if (arr[0].value === '$' && arr[1].type === 'numberValue' && arr[2].subtype === 'scale') {
+console.log('case3.2 $ [arg1] [quantifier]');            
             return `$${arr[1].value} ${arr[2].value}`;
 
         // just transcription of input: [arg1] [scale] [measureUnit] || [arg1] [area/volume identifier] [measureUnit]
         } else if (arr[0].type === 'numberValue' 
         && (arr[1].subtype === 'scale' || arr[1].subtype === 'areaIdentifier' || arr[1].subtype === 'volumeIdentifier')
         && (arr[2].type === 'measureUnit' )) {
+console.log('case3.3 [arg1] [scale] [measureUnit]');            
             return `${arr[0].value} ${arr[1].value} ${arr[2].value}`;
 
         // [operation1] [arg1] [°] trigonometry with degrees TODO: convert
         } else if (arr[0].subtype === 'trigonometry' && arr[1].type === 'numberValue' && arr[2].value === '°') {
+console.log('case3.4 [operation1] [arg1] [°]');            
             return FUNCTION_MAP[arr[0].value](CONVERSIONS_MAP['degree']['radian'](+arr[1].value)).toString();
         
         // [arg1] [operation1/2/3] [arg2] percentages 'as a % of', 'as a % on', 'as a % off' 
         } else if (arr[0].type === 'numberValue' && arr[2].type === 'numberValue' && arr[1].subtype === 'percentage') {
+console.log('case3.5 [arg1] [%] [arg2]');            
             if (arr[1].value === 'as a % of') { return `${(arr[0].value/arr[2].value * 100).toFixed(2)}%` }
             if (arr[1].value === 'as a % on') { return `${(arr[0].value/(arr[0].value + arr[2].value) * 100).toFixed(2)}%` }
             if (arr[1].value === 'as a % off') { return `${(arr[0].value/(arr[2].value - arr[0].value) * 100).toFixed(2)}%` }
         // [arg1] [operation1] [arg2] number systems conversions
         } else if (arr[0].type === 'numberValue' && arr[1].subtype === 'conversion' && arr[2].subtype === 'numberSystem') {
+console.log('case3.6 [arg1] [into] [hex]');            
             return FUNCTION_MAP[arr[2].value](+arr[0].value).toString();
-        } else return '';
+        } else {
+            console.log(`${(arr[0].value/arr[2].value * 100).toFixed(2)}%`)
+            return '';
+        }
     }
 
     // handle braces
