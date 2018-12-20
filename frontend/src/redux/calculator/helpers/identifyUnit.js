@@ -1,5 +1,6 @@
 import { 
-    MULTI_LINE_OPERATIONS_LIST, NUMBER_SYSTEMS, SCALES, CURRENCIES, 
+    // MULTI_LINE_OPERATIONS_LIST, 
+    NUMBER_SYSTEMS, SCALES, CURRENCIES, 
     CONVERSIONS_LIST, PERCENTAGE_LIST, TIME_FUNCTIONS_LIST, 
     ADD_LIST, SUBTRACT_LIST, MULTIPLY_LIST, DIVIDE_LIST,
     ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST, BITWISE_LIST,
@@ -11,8 +12,8 @@ export const identifyUnit = (val) => {
     switch(true) {
         case !isNaN(+val):
             return { type: 'numberValue', value: +val };
-        case MULTI_LINE_OPERATIONS_LIST.includes(val):
-            return { type: 'operation', subtype: 'multiLine', value: val }; // x + x... || (x + x...)/length
+        // case MULTI_LINE_OPERATIONS_LIST.includes(val):
+        //     return { type: 'operation', subtype: 'multiLine', value: val }; // x + x... || (x + x...)/length
         case ONE_ARGUMENT_FUNCTIONS_LIST.includes(val):
             return { type: 'operation', subtype: 'Math', value: val }; // func(x)
         case TRIGONOMETRY_FUNCTIONS_LIST.includes(val):

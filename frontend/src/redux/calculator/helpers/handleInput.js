@@ -16,15 +16,19 @@ export const handleInput = input => (dispatch, getState) => {
     let errors = '';
 
     // parse input
-    let output = input.split('\n').map((row, i) => {
-        if (!row) return ''; // empty output for that row
+    let output = [];
+    input.split('\n').forEach((row, i) => {
+        if (!row) { output.push(''); return; } // empty output for that row
         
         let parsedRow = parseInput(row), reducedRow = []; // type: array of parsed input's elements
+
+        // HANDLE CREATING OF VARIABLES
         let includesWords = false; // indicates possible variables or non-recognized words
         parsedRow.forEach(elem => {
             if (elem.type === 'error') {
                 errors += `At row ${i+1} ${elem.value}`;
-                return '';
+                output.push(''); 
+                return;
             } else if (elem.type === 'word') {
                 if (variables[elem.value]) reducedRow.push({ type: 'variableName', value: elem.value });
                 else {
@@ -44,17 +48,27 @@ export const handleInput = input => (dispatch, getState) => {
             });
             if (!indexOfAssign || indexOfAssign !==1 || reducedRow[0].type !== 'word') {
                 errors += `At row ${i+1} Usage: [varName] [+*/-]= [arg1 [operation [arg2]]]`
-                return '';
+                output.push(''); 
+                return;
             } else {
                 let checkedVariable = checkVariableName(reducedRow[0].value);
                 if (checkedVariable.type === 'variableName') reducedRow[0].type = 'variableName'; // return type 'variableName' if all conditions are kept
                 else {
                     errors += `At row ${i+1} ${checkedVariable.value}`; // show errors if variableName is incorrect
-                    return '';
+                    output.push(''); 
+                    return;
                 }
             }
         };
         // HANDLE ASSIGNING OF VARIABLES
+        if (output) {
+            variables['prev'] = output[i-1];
+            let outputSum = calculate(parseInput(output.filter(elem => elem.length).join('+')))(dispatch, getState);
+            if (outputSum) {
+                variables['total'] = variables['sum'] = outputSum;
+                variables['average'] = variables['avg'] = outputSum / (output.length);
+            }
+        }
         if (reducedRow[0] && reducedRow[0].type === KEYWORDS_TYPES.variableName 
             && reducedRow[1] && reducedRow[1].subtype === KEYWORDS_SUBTYPES.assign 
             && reducedRow.length > 2) {
@@ -68,7 +82,8 @@ export const handleInput = input => (dispatch, getState) => {
                 return variables[reducedRow[0].value].toString();
             } else {
                 errors += `At row ${i+1} Usage: [varName] [+*/-]= [arg1 [operation [arg2]]]`;
-                return ''; // empty output if no meaningful result
+                output.push(''); 
+                return; // empty output if no meaningful result
             }
         }
         // APPLY VARIABLES VALUES INTO INPUT
@@ -80,13 +95,20 @@ export const handleInput = input => (dispatch, getState) => {
                     if (variableValue.length) variableValue.forEach(varElem => arrWithVariables.push(varElem));
                 } else {
                     dispatch(handleError('Variable is not assigned'));
-                    return '';
+                    output.push('');
+                    return;
                 }
             } else arrWithVariables.push(elem);
         });
         reducedRow = arrWithVariables;
         if (i === input.split('\n').length - 1) console.log('Calculating: ', reducedRow);
-        if (reducedRow) return calculate(reducedRow)(dispatch, getState); // type: string - result value
+        if (reducedRow) {
+            let res = calculate(reducedRow)(dispatch, getState);
+            output.push(res); // type: string - result value
+            return;
+        }
+        output.push('');
+        return;
     });
     if (errors) dispatch(handleError(errors));
     dispatch(updateOutput(output.join('\n')));

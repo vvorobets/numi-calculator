@@ -1,4 +1,4 @@
-export const MULTI_LINE_OPERATIONS_LIST = [ 'sum', 'total', 'average', 'avg' ];
+// export const MULTI_LINE_OPERATIONS_LIST = [ 'sum', 'total', 'average', 'avg' ];
 
 export const CONVERSIONS_LIST = [ 'in', 'into', 'as', 'to' ]; 
 
@@ -69,7 +69,8 @@ export const CURRENCIES = [
 ];
 
 export const KEYWORDS_LIST = [ 
-    ...MULTI_LINE_OPERATIONS_LIST, ...CONVERSIONS_LIST, 
+    // ...MULTI_LINE_OPERATIONS_LIST,
+    ...CONVERSIONS_LIST, 
     ...ADD_LIST, ...SUBTRACT_LIST, ...MULTIPLY_LIST, ...DIVIDE_LIST, 'mod', ...BITWISE_LIST,
     ...PERCENTAGE_LIST, ...ONE_ARGUMENT_FUNCTIONS_LIST, ...TRIGONOMETRY_FUNCTIONS_LIST,
     ...TIME_FUNCTIONS_LIST, ...NUMBER_SYSTEMS, ...SCALES, ...MEASURE_UNITS, ...CURRENCIES ];
