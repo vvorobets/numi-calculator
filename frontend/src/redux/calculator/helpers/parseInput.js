@@ -182,7 +182,12 @@ console.log('input', input);
                 parsedExpression.push({ type: 'measureUnit', subtype: 'angular', value: '°' });
                 break;
             default:
-                continue;
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                parsedExpression.push({ type: 'word', value: x });
         }
     }
     if (currentUnit) { // adding last element

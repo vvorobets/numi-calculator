@@ -1,3 +1,5 @@
+import { setVariable, handleError } from '../actions';
+
 import { parseInput } from './parseInput';
 import { FUNCTION_MAP } from './functions';
 import { CONVERSIONS_MAP } from './conversions';
@@ -5,22 +7,55 @@ import {
     ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST
 } from './keywordsLists';
 
-export const calculateParsedInput = arr => (dispatch, getState) => { // type: array
+const KEYWORDS_TYPES = {
+    variableName: 'variableName'
+};
+
+const KEYWORDS_SUBTYPES = {
+    assign: 'assign'
+};
+
+export const calculate = arr => (dispatch, getState) => { // type: array
+console.log('Calculating: ', arr);
     let variables = getState().calculator.variables;
     let VARIABLES_LIST = Object.keys(variables);
     let exchangeRates = getState().calculator.exchangeRates;
 
+    // HANDLE ASSIGNING OF VARIABLES
+    if (arr.length > 2 && arr[0].type === KEYWORDS_TYPES.variableName && arr[1].subtype === KEYWORDS_SUBTYPES.assign) {
+        if (arr[1].value === '=') {
+            let res = calculate(arr.slice(2))(dispatch, getState);
+            if (res) {
+                dispatch(setVariable(arr[0].value, res));
+                return res;
+            } else return ''; // empty output if no meaningful result
+        } else dispatch(handleError('Reassigning is not supported for now'));
+        // not supported for now
+        // else if (arr[1].value === '+=');
+        // else if (arr[1].value === '-=');
+        // else if (arr[1].value === '*=');
+        // else ;// '/='
+    }
+
     // HANDLE VARIABLES WITHIN INPUT
+
     let arrWithReducedVariables = [];
-    arr.forEach(item => {
-        if (item.type === 'variableName') {
-            let variable = parseInput(variables[item.value].toString());
-            if (variable.length) {
-                variable.forEach(varItem => arrWithReducedVariables.push(varItem));
+    arr.forEach((item, i) => {
+        if (item.type === KEYWORDS_TYPES.variableName) {
+            // check if variable is assigned
+            if (variables[item.value]) {
+                let variable = reduceMarkdown(parseInput(variables[item.value].toString()));
+                if (variable.length) {
+                    variable.forEach(varItem => arrWithReducedVariables.push(varItem));
+                }
+            } else {
+                dispatch(handleError('Variable is not assigned'));
+                return '';
             }
         } else arrWithReducedVariables.push(item);
     });
     arr = arrWithReducedVariables;
+console.log('arr with reduced vars', arr);                
 
     // PATTERNS
     if (!arr) return '';
@@ -88,7 +123,7 @@ console.log('len 3');
             let closingBracePosition = arr.lastIndexOf(')');
             if (closingBracePosition > -1) {
                 if (openBracePosition < closingBracePosition) { // calculating inside brackets, recursively if needed
-                    return calculateParsedInput([...arr.slice(0, openBracePosition), ...parseInput(calculateParsedInput(...arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState), ...arr.slice(closingBracePosition+1))])(dispatch, getState);
+                    return calculate([...arr.slice(0, openBracePosition), ...parseInput(calculate(...arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState), ...arr.slice(closingBracePosition+1))])(dispatch, getState);
                 }
             }
         }
@@ -123,16 +158,16 @@ console.log('$ case: ', amount, currencyFrom, currencyTo);
         if (arr[i].type === 'operation') {
             if (ONE_ARGUMENT_FUNCTIONS_LIST.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState)
+                    return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState)
                 } else return '';
             } else if (TRIGONOMETRY_FUNCTIONS_LIST.includes(arr[i].value)) {
                 if(arr[i+1] && arr[i+1].type === 'numberValue') {
                     if(arr[i+2] && arr[i+2].value === '°') {
                         console.error('Not implemented for now');
                         // TODO: convert
-                        return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])(dispatch, getState)
+                        return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])(dispatch, getState)
                     }
-                    return calculateParsedInput([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState);
+                    return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState);
                 } else return '';
             } 
             // if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
@@ -151,7 +186,7 @@ console.log('$ case: ', amount, currencyFrom, currencyTo);
                 }
             }
         }
-    // else if (arr[0].type === 'variableName') {
+    // else if (arr[0].type === KEYWORDS_TYPES.variableName) {
     //     get value;
     //     firstOperandValue = variable.value, 
     //     if(variable.measureUnit) firstOperandType = variable.measureUnit;
@@ -171,7 +206,12 @@ console.log('$ case: ', amount, currencyFrom, currencyTo);
     return '';
 }
 
-
+export const reduceMarkdown = markdown => {
+    return markdown.filter(item => {
+        return (item.type === 'numberValue' || item.type === 'measureUnit' 
+            || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
+    });
+}
 
 // regExp examples
 // const pattern = {

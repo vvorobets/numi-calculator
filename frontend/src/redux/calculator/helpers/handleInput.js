@@ -1,24 +1,23 @@
-import { updateInput, updateOutput, setVariable, handleError } from '../actions';
+import { updateInput, updateOutput, handleError } from '../actions';
 import { parseInput } from './parseInput';
-import { calculateParsedInput } from './calculateParsedInput';
+import { calculate, reduceMarkdown } from './calculate';
 import { checkVariables } from './checkVariables';
 
 export const handleInput = (rowIndex, input) => (dispatch, getState) => {
 
-    let variables = getState().calculator.variables;
-    let VARIABLES_LIST = Object.keys(variables);
-
+    // markdown input
     let markdown = parseInput(input); // type: array of parsed input's elements with variables
 
     let includesPlainWords = false;
     markdown.forEach(item => {
         if (item.type === 'word') includesPlainWords = true;
     });
-    if (includesPlainWords) markdown = checkVariables(markdown, VARIABLES_LIST)(dispatch, getState); // markdown with variables
-
+    if (includesPlainWords) markdown = checkVariables(markdown, rowIndex)(dispatch, getState); // markdown with variables
     dispatch(updateInput(rowIndex, input, markdown));
 
     let errors = '', reducedMarkdown = [], output = '';
+ 
+    // check for errors
     markdown.forEach(item => {
         if(item.type === 'error') {
             errors += item.value;
@@ -26,12 +25,15 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
             errors += 'Words provided are no keywords';
         }
     });
-    if (errors) dispatch(handleError(errors));
-    reducedMarkdown = markdown.filter(item => {
-        return (item.type === 'numberValue' || item.type === 'measureUnit' 
-            || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
-    });
-    if (!errors && reducedMarkdown) output = calculateParsedInput(reducedMarkdown)(dispatch, getState); // type: string - result value
+    if (errors) { // dispatch errors and early escape for output
+        dispatch(handleError(errors));
+        dispatch(updateOutput(rowIndex, ''));
+        return;
+    }
+
+    // calculate output
+    reducedMarkdown = reduceMarkdown(markdown);
+    if (reducedMarkdown) output = calculate(reducedMarkdown)(dispatch, getState); // type: string - result value
     dispatch(updateOutput(rowIndex, output));
 };
 
