@@ -26,7 +26,8 @@ const Calculator = (props) => {
             <textarea
                 rows='5' cols='20'
                 className="calculator__textarea calculator__textarea--output"
-            >{ props.calculator.output }</textarea>
+                value={ props.calculator.output }
+            ></textarea>
             <p>TOTAL: </p>
             <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>

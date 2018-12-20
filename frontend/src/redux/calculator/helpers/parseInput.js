@@ -147,7 +147,7 @@ console.log('input', input);
                     currentUnit = '';
                     currentCharType = '';
                 }
-                parsedExpression.push({ type: 'measureUnit', subtype: 'percentage', value: '%' }); 
+                parsedExpression.push({ type: 'measureUnit', subtype: 'scales', value: '%' }); 
                 break;
             case (x==='$'): 
                 if (currentUnit) {

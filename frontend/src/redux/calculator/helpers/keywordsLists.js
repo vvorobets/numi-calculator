@@ -10,9 +10,9 @@ export const MULTIPLY_LIST = [ '*', 'times', 'multiplied by', 'mul' ];
 
 export const DIVIDE_LIST = [ '/', 'divide by' ];
 
-export const BITWISE_LIST = [ 'mod', 'xor', '^', '<<', '>>', '&', '|' ]; // ! 'mod' as bitwise
+export const BITWISE_LIST = [ 'xor', '^', '<<', '>>', '&', '|' ]; // ! 'mod' as bitwise
 
-export const PERCENTAGE_LIST = [ '%', 'as a % of', 'as a % on', 'as a % off', 'of what is', 'on what is', 'off what is' ];
+export const PERCENTAGE_LIST = [ 'as a % of', 'as a % on', 'as a % off', 'of what is', 'on what is', 'off what is' ];
 
 export const ONE_ARGUMENT_FUNCTIONS_LIST = [ 'sqrt','cbrt','abs','log','ln','fact','round','ceil','floor' ];
 
@@ -23,7 +23,7 @@ export const TIME_FUNCTIONS_LIST = [ 'fromunix' ]; // ! + in
 export const NUMBER_SYSTEMS = [ 'hex', 'bin', 'oct', 'sci', 'scientific' ];
 
 export const SCALES = [ 
-    'thousand', 'million', 'billion', 
+    'thousand', 'million', 'billion', '%', 
     // measurePrefixes
     'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega', 'kilo', 'hecto', 'deca', 
     'deci', 'centi', 'milli', 'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto',
@@ -70,7 +70,7 @@ export const CURRENCIES = [
 
 export const KEYWORDS_LIST = [ 
     ...MULTI_LINE_OPERATIONS_LIST, ...CONVERSIONS_LIST, 
-    ...ADD_LIST, ...SUBTRACT_LIST, ...MULTIPLY_LIST, ...DIVIDE_LIST, ...BITWISE_LIST,
+    ...ADD_LIST, ...SUBTRACT_LIST, ...MULTIPLY_LIST, ...DIVIDE_LIST, 'mod', ...BITWISE_LIST,
     ...PERCENTAGE_LIST, ...ONE_ARGUMENT_FUNCTIONS_LIST, ...TRIGONOMETRY_FUNCTIONS_LIST,
     ...TIME_FUNCTIONS_LIST, ...NUMBER_SYSTEMS, ...SCALES, ...MEASURE_UNITS, ...CURRENCIES ];
 

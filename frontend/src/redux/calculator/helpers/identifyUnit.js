@@ -8,10 +8,9 @@ import {
 } from './keywordsLists';
 
 export const identifyUnit = (val) => {
-console.log('identifying', val);
     switch(true) {
         case !isNaN(+val):
-            return { type: 'numberValue', value: val };
+            return { type: 'numberValue', value: +val };
         case MULTI_LINE_OPERATIONS_LIST.includes(val):
             return { type: 'operation', subtype: 'multiLine', value: val }; // x + x... || (x + x...)/length
         case ONE_ARGUMENT_FUNCTIONS_LIST.includes(val):
@@ -32,6 +31,8 @@ console.log('identifying', val);
             return { type: 'operation', subtype: 'multiply', value: val }; // x * y
         case DIVIDE_LIST.includes(val):
             return { type: 'operation', subtype: 'divide', value: val }; // x / y
+        case val === 'mod':
+            return { type: 'operation', subtype: 'modulo', value: val }; // x / y
         case BITWISE_LIST.includes(val):
             return { type: 'operation', subtype: 'bitwise', value: val }; // x ^ y
         case CURRENCIES.includes(val):

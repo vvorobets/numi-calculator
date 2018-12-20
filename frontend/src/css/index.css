@@ -145,18 +145,18 @@ body {
   background-color: #999999;
   color: #FFF;
   font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
-  font-size: 2rem;
+  font-size: 1rem;
   letter-spacing: 1px;
   line-height: 1.7;
   overflow: none;
 }
 
 .calculator__textarea--input {
-  width: 75%;
+  width: 25%;
 }
 
 .calculator__textarea--output {
-  width: 25%;
+  width: 75%;
 }
 
 .operation-item__button {
