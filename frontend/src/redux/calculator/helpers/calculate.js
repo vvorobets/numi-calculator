@@ -23,18 +23,16 @@ console.log('Calculating: ', arr);
 
     // HANDLE ASSIGNING OF VARIABLES
     if (arr.length > 2 && arr[0].type === KEYWORDS_TYPES.variableName && arr[1].subtype === KEYWORDS_SUBTYPES.assign) {
-        if (arr[1].value === '=') {
-            let res = calculate(arr.slice(2))(dispatch, getState);
-            if (res) {
-                dispatch(setVariable(arr[0].value, res));
-                return res;
-            } else return ''; // empty output if no meaningful result
-        } else dispatch(handleError('Reassigning is not supported for now'));
-        // not supported for now
-        // else if (arr[1].value === '+=');
-        // else if (arr[1].value === '-=');
-        // else if (arr[1].value === '*=');
-        // else ;// '/='
+        let res = calculate(arr.slice(2))(dispatch, getState);
+        if (res) {
+            if (arr[1].value === '+=') res += +variables[arr[0].value];
+            else if (arr[1].value === '-=') res = variables[arr[0].value] - res;
+            else if (arr[1].value === '*=') res *= variables[arr[0].value];
+            else if (arr[1].value === '/=') res = variables[arr[0].value] / res;
+            dispatch(setVariable(arr[0].value, res));
+            return res.toString();
+        } else return ''; // empty output if no meaningful result
+
     }
 
     // HANDLE VARIABLES WITHIN INPUT

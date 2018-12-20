@@ -3,7 +3,6 @@ import { checkVariableName } from './checkVariableName';
 
 export const checkVariables = (markdown, rowIndex) => (dispatch, getState) => { // type: array of parsed input's elements; 
     // @param rowIndex - index of input row from within there is a try to assign variable
-    
     let variables = getState().calculator.variables;
     let VARIABLES_LIST = Object.keys(variables);
 
@@ -33,35 +32,11 @@ export const checkVariables = (markdown, rowIndex) => (dispatch, getState) => { 
     const markdownWithNewVariables = markdown.map((item, i) => {
         if (item.type === 'word') {
             let checkedVariable = checkVariableName(item.value);
-            if (checkedVariable.type === 'variableName') {
-
-                // check if already assigned
-                let history = getState().calculator.history;
-                if (!history) return checkedVariable; // early escape
-                let isAlreadyAssigned;
-                history.forEach((rowItem, i) => { // iterating through rows of input
-console.log('history: ', history);
-                    if (i !== rowIndex && rowItem.length) { // exclude index of current input row
-                        let reducedRowItem = rowItem.filter(item => { // filter out element with no accountable content
-                            return item.type === 'numberValue' || item.type === 'measureUnit' || item.type === 'word'
-                            || item.type === 'operation' || item.type === 'variableName';
-                        });
-
-                        reducedRowItem.forEach((elem, j) => {
-                            if (elem.type === 'variableName' && elem.value === checkedVariable.value && rowItem[j].subtype === 'assign' ) {
-                                isAlreadyAssigned = true;
-                            }
-                        });
-                    }
-                });
-                if (isAlreadyAssigned) dispatch(handleError('Reassigning of variables is not supported'));
-                else return checkedVariable; // return type 'variableName' if all conditions are kept
-            }
+            if (checkedVariable.type === 'variableName') return checkedVariable; // return type 'variableName' if all conditions are kept
             else dispatch(handleError(checkedVariable.value)); // show errors if variableName is incorrect
         }
         return item; // default return - copy existing element
     });
-
 
     return markdownWithNewVariables;
 }
