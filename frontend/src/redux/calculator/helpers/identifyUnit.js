@@ -1,14 +1,16 @@
 import { 
     MULTI_LINE_OPERATIONS_LIST, NUMBER_SYSTEMS, SCALES, CURRENCIES, 
-    CONVERSIONS_LIST, PERCENTAGE_LIST, TIME_FUNCTIONS_LIST, ADD_SUBTRACT_LIST, MULTIPLY_DIVIDE_LIST, 
-    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST, 
+    CONVERSIONS_LIST, PERCENTAGE_LIST, TIME_FUNCTIONS_LIST, 
+    ADD_LIST, SUBTRACT_LIST, MULTIPLY_LIST, DIVIDE_LIST,
+    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST, BITWISE_LIST,
     TEMPERATURE_UNITS, LENGTH_UNITS, AREA_UNITS, AREA_IDENTIFIERS, VOLUME_UNITS, VOLUME_IDENTIFIERS,
     WEIGHT_UNITS, ANGULAR_UNITS, DATA_UNITS, CSS_UNITS
 } from './keywordsLists';
 
 export const identifyUnit = (val) => {
+console.log('identifying', val);
     switch(true) {
-        case !isNaN(parseFloat(val)):
+        case !isNaN(+val):
             return { type: 'numberValue', value: val };
         case MULTI_LINE_OPERATIONS_LIST.includes(val):
             return { type: 'operation', subtype: 'multiLine', value: val }; // x + x... || (x + x...)/length
@@ -22,10 +24,16 @@ export const identifyUnit = (val) => {
             return { type: 'operation', subtype: 'percentage', value: val }; // func(x, y)
         case TIME_FUNCTIONS_LIST.includes(val):
             return { type: 'operation', subtype: 'time', value: val }; // func(x)
-        case ADD_SUBTRACT_LIST.includes(val):
-            return { type: 'operation', subtype: 'add-subtract', value: val }; // x + y
-        case MULTIPLY_DIVIDE_LIST.includes(val):
-            return { type: 'operation', subtype: 'multiply-divide', value: val }; // x * y
+        case ADD_LIST.includes(val):
+            return { type: 'operation', subtype: 'add', value: val }; // x + y
+        case SUBTRACT_LIST.includes(val):
+            return { type: 'operation', subtype: 'subtract', value: val }; // x - y
+        case MULTIPLY_LIST.includes(val):
+            return { type: 'operation', subtype: 'multiply', value: val }; // x * y
+        case DIVIDE_LIST.includes(val):
+            return { type: 'operation', subtype: 'divide', value: val }; // x / y
+        case BITWISE_LIST.includes(val):
+            return { type: 'operation', subtype: 'bitwise', value: val }; // x ^ y
         case CURRENCIES.includes(val):
             return { type: 'measureUnit', subtype: 'currency', value: val };
         case NUMBER_SYSTEMS.includes(val):

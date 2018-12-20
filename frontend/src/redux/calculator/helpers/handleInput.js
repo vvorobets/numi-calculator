@@ -14,7 +14,7 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
     markdown.forEach(item => {
         if (item.type === 'word') includesPlainWords = true;
     });
-    if (includesPlainWords) markdown = checkVariables(markdown, VARIABLES_LIST)(dispatch, getState); 
+    if (includesPlainWords) markdown = checkVariables(markdown, VARIABLES_LIST)(dispatch, getState); // markdown with variables
 
     dispatch(updateInput(rowIndex, input, markdown));
 
@@ -26,13 +26,12 @@ export const handleInput = (rowIndex, input) => (dispatch, getState) => {
             errors += 'Words provided are no keywords';
         }
     });
+    if (errors) dispatch(handleError(errors));
     reducedMarkdown = markdown.filter(item => {
         return (item.type === 'numberValue' || item.type === 'measureUnit' 
             || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
     });
     if (!errors && reducedMarkdown) output = calculateParsedInput(reducedMarkdown)(dispatch, getState); // type: string - result value
     dispatch(updateOutput(rowIndex, output));
-    dispatch(handleError(errors));
 };
-
 

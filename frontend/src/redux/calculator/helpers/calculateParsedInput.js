@@ -1,36 +1,83 @@
 import { parseInput } from './parseInput';
 import { FUNCTION_MAP } from './functions';
+import { CONVERSIONS_MAP } from './conversions';
 import { 
-    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST, MULTIWORD_KEYWORDS
+    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST
 } from './keywordsLists';
 
 export const calculateParsedInput = arr => (dispatch, getState) => { // type: array
-    
     let variables = getState().calculator.variables;
     let VARIABLES_LIST = Object.keys(variables);
     let exchangeRates = getState().calculator.exchangeRates;
 
-    // test for eval()
+    // HANDLE VARIABLES WITHIN INPUT
+    let arrWithReducedVariables = [];
+    arr.forEach(item => {
+        if (item.type === 'variableName') {
+            let variable = parseInput(variables[item.value].toString());
+            if (variable.length) {
+                variable.forEach(varItem => arrWithReducedVariables.push(varItem));
+            }
+        } else arrWithReducedVariables.push(item);
+    });
+    arr = arrWithReducedVariables;
+
+    // PATTERNS
     if (!arr) return '';
-    let stringifiedInput = arr.map(item => item.value).join(' ');
-    let testForEval = true
-    for (let n of stringifiedInput) {
-        if (!/[()\d+/*|^&<>\s/xob-]/.test(n)) testForEval = false;
-    };
-    if (testForEval) {
-        try {
-            let res = eval(stringifiedInput);
-            if (!isNaN(res)) return res.toString();
-            else return '';
-        } catch(error) {
-            console.error(error);
-        }
-    };
 
     if (arr.length === 1) {
         if (arr[0].type === 'numberValue') return arr[0].value.toString();
-        else if (arr[0].type === 'variableName') return variables[arr[0].value];
         else return '';
+    }
+
+    if (arr.length === 2) {
+        // just transcription of input: [arg1] [measureUnit]
+        if (arr[0].type === 'numberValue' && (arr[1].subtype === 'percentage' || (arr[1].type === 'measureUnit' 
+            && arr[1].subtype !== 'areaIdentifier' && arr[1].subtype !== 'volumeIdentifier'))) {
+                return `${arr[0].value} ${arr[1].value}`;
+        // $ [arg1]
+        } else if (arr[0].value === '$' && arr[1].type === 'numberValue') {
+            return `${arr[1].value}`;
+
+        // [function] (arg1)
+        } else if (arr[0].subtype === 'Math' || arr[0].subtype === 'trigonometry' || arr[0].value === 'fromunix') {
+            return FUNCTION_MAP[arr[0].value](parseFloat(arr[1].value)).toString();
+        } else return '';
+    }
+
+    if (arr.length === 3) {
+console.log('len 3');
+        // simple two-operands operations [arg1] [operation] [arg2]
+        if (arr[0].type === 'numberValue' && arr[0].type === 'numberValue') {
+            if (arr[1].subtype === 'add' || arr[1].subtype === 'subtract' 
+                || arr[1].subtype === 'multiply' || arr[1].subtype === 'multiply-divide') {
+                return FUNCTION_MAP[arr[1].subtype](+arr[0].value, +arr[2].value).toString();
+            } else if (arr[1].subtype === 'bitwise') {
+                return FUNCTION_MAP[arr[1].value](+arr[0].value, +arr[2].value).toString();
+            }
+        // $ [arg1] [quantifier]
+        } else if (arr[0].value === '$' && arr[1].type === 'numberValue' && arr[2].subtype === 'scale') {
+            return `$${arr[1].value} ${arr[2].value}`;
+
+        // just transcription of input: [arg1] [scale] [measureUnit] || [arg1] [area/volume identifier] [measureUnit]
+        } else if (arr[0].type === 'numberValue' 
+        && (arr[1].subtype === 'scale' || arr[1].subtype === 'areaIdentifier' || arr[1].subtype === 'volumeIdentifier')
+        && (arr[2].type === 'measureUnit' )) {
+            return `${arr[0].value} ${arr[1].value} ${arr[2].value}`;
+
+        // [operation1] [arg1] [°] trigonometry with degrees TODO: convert
+        } else if (arr[0].subtype === 'trigonometry' && arr[1].type === 'numberValue' && arr[2].value === '°') {
+            return FUNCTION_MAP[arr[0].value](CONVERSIONS_MAP['degree']['radian'](+arr[1].value)).toString();
+        
+        // [arg1] [operation1/2/3] [arg2] percentages 'as a % of', 'as a % on', 'as a % off' 
+        } else if (arr[0].type === 'numberValue' && arr[2].type === 'numberValue' && arr[1].subtype === 'percentage') {
+            if (arr[1].value === 'as a % of') { return `${(arr[0].value/arr[2].value * 100).toFixed(2)}%` }
+            if (arr[1].value === 'as a % on') { return `${(arr[0].value/(arr[0].value + arr[2].value) * 100).toFixed(2)}%` }
+            if (arr[1].value === 'as a % off') { return `${(arr[0].value/(arr[2].value - arr[0].value) * 100).toFixed(2)}%` }
+        // [arg1] [operation1] [arg2] number systems conversions
+        } else if (arr[0].type === 'numberValue' && arr[1].subtype === 'conversion' && arr[2].subtype === 'numberSystem') {
+            return FUNCTION_MAP[arr[2].value](+arr[0].value).toString();
+        } else return '';
     }
 
     // handle braces
@@ -56,13 +103,16 @@ export const calculateParsedInput = arr => (dispatch, getState) => { // type: ar
         if (arr[0].type === 'numberValue') {
             amount = arr[0].value;
             currencyFrom = arr[1].value;
-        } else if (arr[0].value === '$' || arr[1].type === 'numberValue') {
-            currencyFrom = 'USD';
-            amount = arr[0].value;
+        } else if (arr[0].value === '$' && arr[1].type === 'numberValue') {
+            currencyFrom = '$';
+            amount = arr[1].value;
         } else return '';
         currencyTo = arr[3].value;
-        if (currencyFrom === 'USD') return `${(amount / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
+console.log('$ case: ', amount, currencyFrom, currencyTo);
+        if (currencyFrom === currencyTo) return `${arr[0].value} ${arr[1].value}`
+        if (currencyFrom === 'USD' || currencyFrom === '$') return `${(amount / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
         else if (currencyTo === 'USD') return `${(amount * exchangeRates[currencyFrom]).toFixed(2)} USD`;
+        else if (currencyTo === '$') return `$${(amount * exchangeRates[currencyFrom]).toFixed(2)}`;
         else return `${(amount * exchangeRates[currencyFrom] / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
         // TODO: add cases for '$', uah, dollars, $ CAD, euro etc.
     }

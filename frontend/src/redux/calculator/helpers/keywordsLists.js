@@ -2,9 +2,15 @@ export const MULTI_LINE_OPERATIONS_LIST = [ 'sum', 'total', 'average', 'avg' ];
 
 export const CONVERSIONS_LIST = [ 'in', 'into', 'as', 'to' ]; 
 
-export const ADD_SUBTRACT_LIST = [ '+', '-', '+=', '-=', 'plus', 'and', 'with', 'minus', 'subtract', 'without' ];
+export const ADD_LIST = [ '+', 'plus', 'and', 'with' ];
 
-export const MULTIPLY_DIVIDE_LIST = [ 'mod', '*', '/', '*=', '/=', 'times', 'multiplied by', 'mul', 'divide by' ];
+export const SUBTRACT_LIST = [ '-', 'minus', 'subtract', 'without' ];
+
+export const MULTIPLY_LIST = [ '*', 'times', 'multiplied by', 'mul' ];
+
+export const DIVIDE_LIST = [ '/', 'divide by' ];
+
+export const BITWISE_LIST = [ 'mod', 'xor', '^', '<<', '>>', '&', '|' ]; // ! 'mod' as bitwise
 
 export const PERCENTAGE_LIST = [ '%', 'as a % of', 'as a % on', 'as a % off', 'of what is', 'on what is', 'off what is' ];
 
@@ -63,7 +69,8 @@ export const CURRENCIES = [
 ];
 
 export const KEYWORDS_LIST = [ 
-    ...MULTI_LINE_OPERATIONS_LIST, ...CONVERSIONS_LIST, ...ADD_SUBTRACT_LIST, ...MULTIPLY_DIVIDE_LIST, 
+    ...MULTI_LINE_OPERATIONS_LIST, ...CONVERSIONS_LIST, 
+    ...ADD_LIST, ...SUBTRACT_LIST, ...MULTIPLY_LIST, ...DIVIDE_LIST, ...BITWISE_LIST,
     ...PERCENTAGE_LIST, ...ONE_ARGUMENT_FUNCTIONS_LIST, ...TRIGONOMETRY_FUNCTIONS_LIST,
     ...TIME_FUNCTIONS_LIST, ...NUMBER_SYSTEMS, ...SCALES, ...MEASURE_UNITS, ...CURRENCIES ];
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { addLine, deleteLine, handleError } from '../../../redux/calculator/actions';
 
-import { handleInput } from '../../../redux/calculator/helpers/operations';
+import { handleInput } from '../../../redux/calculator/helpers/handleInput';
 import { renderMarkdown } from './helpers/renderMarkdown';
 
 const OperationItem = (props) => {

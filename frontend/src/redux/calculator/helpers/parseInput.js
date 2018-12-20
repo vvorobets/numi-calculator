@@ -2,9 +2,10 @@ import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
 export const parseInput = (input) => {
-    if (input[0] === '') return [{ type: 'error', value: 'Empty input' }];
+console.log('input', input);
+    if (input === '') return [{ type: 'error', value: 'Empty input' }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
-    if (input.slice(0,2) === '//') return [{ type: 'comment', value: input }];
+    if (input[0] === '//' && input[1] === '//') return [{ type: 'comment', value: input }];
 
     let currentCharType = '', currentUnit = '', parsedExpression = [];
 
@@ -40,8 +41,9 @@ export const parseInput = (input) => {
                 currentCharType = 'number'; 
                 break;
             case /[A-Za-z]/.test(x):
-                if (currentCharType === 'letter') currentUnit = currentUnit.concat(x);
-                else {
+                if (currentCharType === 'letter' || (currentCharType === 'number' && !isNaN(+currentUnit.concat(x)))) {
+                    currentUnit = currentUnit.concat(x);
+                } else {
                     if (currentUnit) parsedExpression.push(identifyUnit(currentUnit));
                     currentUnit = x;
                     currentCharType = 'letter';
@@ -91,8 +93,10 @@ export const parseInput = (input) => {
                     parsedExpression.push({ type: 'operation', subtype: 'assign', value: x.concat('=')});
                     i++;
                 } else {
-                    if (x==='+' || x==='-') parsedExpression.push({ type: 'operation', subtype: 'add-subtract', value: x });
-                    else parsedExpression.push({ type: 'operation', subtype: 'multiply-divide', value: x });
+                    if (x==='+') parsedExpression.push({ type: 'operation', subtype: 'add', value: x });
+                    else if (x==='-') parsedExpression.push({ type: 'operation', subtype: 'subtract', value: x });
+                    else if (x==='*') parsedExpression.push({ type: 'operation', subtype: 'multiply', value: x });
+                    else parsedExpression.push({ type: 'operation', subtype: 'divide', value: x });
                 }
                 break;
             case (x===':'):
@@ -159,14 +163,23 @@ export const parseInput = (input) => {
                     currentUnit = '';
                     currentCharType = '';
                 }
-                parsedExpression.push({ type: 'operation', value: x }); 
+                if (x==='(' || x===')') parsedExpression.push({ type: 'operation', value: x }); 
+                else parsedExpression.push({ type: 'operation', subtype: 'bitwise', value: x }); 
                 break;
             case (/[<>]/.test(x)): 
                 currentCharType = '';
                 if (input[i+1] === x) {
-                    parsedExpression.push({ type: 'operation', value: x.concat(x) });
+                    parsedExpression.push({ type: 'operation', subtype: 'bitwise', value: x.concat(x) });
                     i++
                 } else parsedExpression.push({ type: 'word', value: x });  
+                break;
+            case (x==='°'):
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                parsedExpression.push({ type: 'measureUnit', subtype: 'angular', value: '°' });
                 break;
             default:
                 continue;
@@ -176,6 +189,7 @@ export const parseInput = (input) => {
         if (currentCharType === 'comment') parsedExpression.push({ type: 'comment', value: currentUnit });
         else parsedExpression.push(identifyUnit(currentUnit));
     };
+console.log('parsedExpression: ', parsedExpression);
     return parsedExpression;
 }
 
