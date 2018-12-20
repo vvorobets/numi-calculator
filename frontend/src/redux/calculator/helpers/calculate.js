@@ -1,4 +1,4 @@
-import { setVariable, handleError } from '../actions';
+import { handleError } from '../actions';
 
 import { parseInput } from './parseInput';
 import { FUNCTION_MAP } from './functions';
@@ -25,11 +25,10 @@ console.log('Calculating: ', arr);
     if (arr.length > 2 && arr[0].type === KEYWORDS_TYPES.variableName && arr[1].subtype === KEYWORDS_SUBTYPES.assign) {
         let res = calculate(arr.slice(2))(dispatch, getState);
         if (res) {
-            if (arr[1].value === '+=') res += +variables[arr[0].value];
+            if (arr[1].value === '+=') res = parseFloat(res) + parseFloat(variables[arr[0].value]);
             else if (arr[1].value === '-=') res = variables[arr[0].value] - res;
             else if (arr[1].value === '*=') res *= variables[arr[0].value];
             else if (arr[1].value === '/=') res = variables[arr[0].value] / res;
-            dispatch(setVariable(arr[0].value, res));
             return res.toString();
         } else return ''; // empty output if no meaningful result
 
@@ -42,7 +41,7 @@ console.log('Calculating: ', arr);
         if (item.type === KEYWORDS_TYPES.variableName) {
             // check if variable is assigned
             if (variables[item.value]) {
-                let variable = reduceMarkdown(parseInput(variables[item.value].toString()));
+                let variable = reduceParsedInput(parseInput(variables[item.value].toString()));
                 if (variable.length) {
                     variable.forEach(varItem => arrWithReducedVariables.push(varItem));
                 }
@@ -81,16 +80,7 @@ console.log('arr with reduced vars', arr);
     if (arr.length === 3) {
 console.log('len 3');
         // simple two-operands operations [arg1] [operation] [arg2]
-        if (arr[0].type === 'numberValue' && arr[0].type === 'numberValue') {
-console.log('case3.1 [arg1] [operation] [arg2]');
-            if (arr[1].subtype === 'add' || arr[1].subtype === 'subtract' 
-                || arr[1].subtype === 'multiply' || arr[1].subtype === 'multiply-divide') {
-                return FUNCTION_MAP[arr[1].subtype](+arr[0].value, +arr[2].value).toString();
-            } else if (arr[1].subtype === 'bitwise') {
-                return FUNCTION_MAP[arr[1].value](+arr[0].value, +arr[2].value).toString();
-            }
-        // $ [arg1] [quantifier]
-        } else if (arr[0].value === '$' && arr[1].type === 'numberValue' && arr[2].subtype === 'scale') {
+        if (arr[0].value === '$' && arr[1].type === 'numberValue' && arr[2].subtype === 'scale') {
 console.log('case3.2 $ [arg1] [quantifier]');            
             return `$${arr[1].value} ${arr[2].value}`;
 
@@ -116,6 +106,15 @@ console.log('case3.5 [arg1] [%] [arg2]');
         } else if (arr[0].type === 'numberValue' && arr[1].subtype === 'conversion' && arr[2].subtype === 'numberSystem') {
 console.log('case3.6 [arg1] [into] [hex]');            
             return FUNCTION_MAP[arr[2].value](+arr[0].value).toString();
+        } else if (arr[0].type === 'numberValue' && arr[0].type === 'numberValue') {
+            console.log('case3.1 [arg1] [operation] [arg2]');
+            if (arr[1].subtype === 'add' || arr[1].subtype === 'subtract' 
+                || arr[1].subtype === 'multiply' || arr[1].subtype === 'multiply-divide') {
+                return FUNCTION_MAP[arr[1].subtype](+arr[0].value, +arr[2].value).toString();
+            } else if (arr[1].subtype === 'bitwise') {
+                return FUNCTION_MAP[arr[1].value](+arr[0].value, +arr[2].value).toString();
+            }
+        // $ [arg1] [quantifier]
         } else {
             console.log(`${(arr[0].value/arr[2].value * 100).toFixed(2)}%`)
             return '';
@@ -213,8 +212,8 @@ console.log('$ case: ', amount, currencyFrom, currencyTo);
     return '';
 }
 
-export const reduceMarkdown = markdown => {
-    return markdown.filter(item => {
+export const reduceParsedInput = parsedInput => {
+    return parsedInput.filter(item => {
         return (item.type === 'numberValue' || item.type === 'measureUnit' 
             || item.type === 'variableName' || item.type === 'operation'); // wipe out comments, labels etc
     });

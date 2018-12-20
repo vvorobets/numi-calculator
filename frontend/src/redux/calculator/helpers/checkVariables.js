@@ -1,7 +1,7 @@
 import { handleError } from '../actions';
 import { checkVariableName } from './checkVariableName';
 
-export const checkVariables = (markdown, rowIndex) => (dispatch, getState) => { // type: array of parsed input's elements; 
+export const checkVariables = (markdown) => (dispatch, getState) => { // type: array of parsed input's elements; 
     // @param rowIndex - index of input row from within there is a try to assign variable
     let variables = getState().calculator.variables;
     let VARIABLES_LIST = Object.keys(variables);
