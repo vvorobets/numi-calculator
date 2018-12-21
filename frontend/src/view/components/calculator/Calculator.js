@@ -3,49 +3,54 @@ import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
-import { refresh } from '../../../redux/calculator/actions';
-
-// React components
-import OperationItem from './OperationItem';
+import { refresh, handleError } from '../../../redux/calculator/actions';
+import { handleInput } from '../../../redux/calculator/helpers/handleInput';
 
 const Calculator = (props) => {
 
-    const historyArray = props.calculator.history.map((item, i) => {
-            return <OperationItem 
-                key={ i }
-                index={ i } // to get key from the props
-                content={ item }
-            /> 
-        });
-        
+    const getInput = e => {
+        if (e.target.value) props.handleInput(e.target.value);
+    }
+    
     return (
         <>
         <h3>Calculator App</h3>
-        <button 
-            className="operation-item__button operation-item__button--delete operation-item__button--clear-all"
-            onClick={ props.refresh }
-        >Clear All</button>
         <div className="calculator-layout">
-            { props.calculator.history.length ? historyArray : <OperationItem key={ 0 } index={ 0 } content={{ input: '', markdown: [], output: '' }} /> }
+            <textarea
+                onChange={ getInput }
+                value={ props.calculator.input }
+                rows='5' cols='20'
+                placeholder="Input here" 
+                className="calculator__textarea calculator__textarea--input"
+            ></textarea>
+            <textarea
+                rows='5' cols='20'
+                className="calculator__textarea calculator__textarea--output"
+                value={ props.calculator.output }
+            ></textarea>
+            <p>TOTAL: </p>
             <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>
+        <button 
+            className="operation-item__button operation-item__button--refresh"
+            onClick={ props.refresh }
+        >Clear All</button>
         </>
     )
 }
 
 Calculator.propTypes = {
+    user: PropTypes.shape({
+        username: PropTypes.string
+    }),
 	calculator: PropTypes.shape({
-        history: PropTypes.arrayOf(PropTypes.shape({
-            input: PropTypes.string,
-            markdown: PropTypes.arrayOf(PropTypes.shape({
-                type: PropTypes.string,
-                value: PropTypes.string
-            })),
-            output: PropTypes.string
-        })),
+        input: PropTypes.string,
+        output: PropTypes.string,
         errorMessage: PropTypes.string,
     }),
-    refresh: PropTypes.func
+    refresh: PropTypes.func,
+    handleInput: PropTypes.func,
+    handleError: PropTypes.func
 };
 
 const mapStateToProps = ({ user, calculator }) => ({
@@ -54,7 +59,7 @@ const mapStateToProps = ({ user, calculator }) => ({
 
 const CalculatorConnected = connect(
     mapStateToProps,
-    { refresh }
+    { handleInput, handleError, refresh }
 )(Calculator);
 
 export default CalculatorConnected;

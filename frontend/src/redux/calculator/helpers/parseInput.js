@@ -1,11 +1,11 @@
 import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
-export const parseInput = (input) => {
-console.log('input', input);
-    if (input === '') return [{ type: 'error', value: 'Empty input' }];
+export const parseInput = input => {
+    if (!input) return [{ type: 'error', value: 'Empty input' }];
+    if (!isNaN(+input)) return [{ type: 'numberValue', value: input }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
-    if (input[0] === '//' && input[1] === '//') return [{ type: 'comment', value: input }];
+    if (input.length > 1 && input.startsWith('//')) return [{ type: 'comment', value: input }];
 
     let currentCharType = '', currentUnit = '', parsedExpression = [];
 
@@ -147,7 +147,7 @@ console.log('input', input);
                     currentUnit = '';
                     currentCharType = '';
                 }
-                parsedExpression.push({ type: 'measureUnit', subtype: 'percentage', value: '%' }); 
+                parsedExpression.push({ type: 'measureUnit', subtype: 'scales', value: '%' }); 
                 break;
             case (x==='$'): 
                 if (currentUnit) {
@@ -182,14 +182,18 @@ console.log('input', input);
                 parsedExpression.push({ type: 'measureUnit', subtype: 'angular', value: '°' });
                 break;
             default:
-                continue;
+                if (currentUnit) {
+                    parsedExpression.push(identifyUnit(currentUnit));
+                    currentUnit = '';
+                    currentCharType = '';
+                }
+                parsedExpression.push({ type: 'word', value: x });
         }
     }
     if (currentUnit) { // adding last element
         if (currentCharType === 'comment') parsedExpression.push({ type: 'comment', value: currentUnit });
         else parsedExpression.push(identifyUnit(currentUnit));
     };
-console.log('parsedExpression: ', parsedExpression);
     return parsedExpression;
 }
 

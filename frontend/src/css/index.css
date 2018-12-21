@@ -136,99 +136,29 @@ body {
   padding: .5rem;
 }
 
-.operation-item {
-  min-height: 2.5rem;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.operation-item__input-block, .operation-item__input-background, .operation-item__textarea {
-  height: 40px;
-}
-
-.operation-item__input-block {
-  width: 82%;
-  display: block;
-  margin: 0 auto;
-  -webkit-text-size-adjust: none;
-}
-
-.operation-item__input-background {
-  width: 100%;
-  padding: .25rem;
-}
-
-.operation-item__input-backlights, .operation-item__textarea {
-  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
-  font-size: 1rem;
-  letter-spacing: 1px;
-}
-
-.operation-item__input-background {
-  position: absolute;
-  z-index: 1;
-  width: calc(75% - 16.4rem);
-  border: 1px solid #685972;
-  background-color: #fff;
-  overflow: auto;
-  pointer-events: none;
-}
-
-.operation-item__input-backlights {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: transparent;
-}
-
-.operation-item__markdown--header {
-  color: orange;
-}
-
-.operation-item__markdown--label {
-  color: orange;
-}
-
-.operation-item__markdown--comment {
-  color: gray;
-  font-style: italic;
-}
-
-.operation-item__markdown--measureUnit {
-  color: lightblue;
-}
-
-.operation-item__markdown--keyword {
-  color: blue;
-}
-
-.operation-item__markdown--numberValue {
-  color: black;
-}
-
-.operation-item__markdown--error {
-  color:red;
-}
-
-.operation-item__textarea {
-  position: absolute;
-  display: block;
-  z-index: 2;
-  width: calc(75% - 16.4rem);
+.calculator__textarea {
+  height: 600px;
   margin: 0;
   padding: .25rem;
-  border: 1px solid #999999;
-  border-radius: 0;
-  color: transparent;
-  background-color: transparent;
-  overflow: auto;
-  resize: none;
+  border: .5rem solid #F7F7F7;
+  border-radius: .25rem;
+  background-color: #999999;
+  color: #FFF;
+  font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  line-height: 1.7;
+  overflow: none;
 }
 
-.operation-item__textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #c6aada;
+.calculator__textarea--input {
+  width: 60%;
+}
+
+.calculator__textarea--output {
+  width: 40%;
+  color: lightblue;
 }
 
 .operation-item__button {
@@ -238,42 +168,13 @@ body {
   font-weight: bold;
 }
 
-.operation-item__button--execute {
-  width: 18%;
-}
-
-.operation-item__button--copy {
-  width: 8%;
-  padding: .25rem;
-}
-
-.operation-item__button--delete {
-  width: 8%;
+.operation-item__button--refresh {
+  width: 20%;
   padding: .25rem;
   background-color: 	#FAB387;
   color: white;
 }
 
-.operation-item__button--clear-all {
-  width: 20%;
-}
-
-.operation-item__button--delete:hover {
+.operation-item__button--refresh:hover {
   background-color: 	#FF7973;
-}
-
-.operation-item__view-span {
-  height: 2rem;
-  background-color: #F7F7F7;
-  padding: .5rem;
-}
-
-.operation-item__view-span--input {
-  width: 58%;
-  background-color: #F7F7F7;
-}
-
-.operation-item__view-span--output {
-  width: 20%;
-  background-color: #F7F7F7;
 }
