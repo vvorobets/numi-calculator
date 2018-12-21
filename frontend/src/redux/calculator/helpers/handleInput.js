@@ -11,7 +11,7 @@ export const handleInput = input => (dispatch, getState) => {
 
     dispatch(updateInput(input));
     if (!input) dispatch(handleError('Empty input'));
-    
+        
     let variables = { 'Pi': Math.PI, 'E': Math.E, 'ppi': 96 };
     let errors = '';
 
@@ -22,10 +22,10 @@ export const handleInput = input => (dispatch, getState) => {
 
         if (output) {
             variables['prev'] = output[i-1];
-            let outputSum = calculate(parseInput(output.filter(elem => elem.length).join('+')))(dispatch, getState);
+            let outputSum = calculate(reduceParsedInput(parseInput(output.filter(elem => elem.length).join('+'))))(dispatch, getState);
             if (outputSum) {
                 variables['total'] = variables['sum'] = outputSum;
-                variables['average'] = variables['avg'] = outputSum / (output.length);
+                variables['average'] = variables['avg'] = outputSum / output.length;
             }
         }
         
@@ -80,6 +80,7 @@ export const handleInput = input => (dispatch, getState) => {
                 else if (reducedRow[1].value === '-=') variables[reducedRow[0].value] -= res;
                 else if (reducedRow[1].value === '*=') variables[reducedRow[0].value] *= res;
                 else if (reducedRow[1].value === '/=') variables[reducedRow[0].value] /= res;
+                output.push(variables[reducedRow[0].value].toString()); 
                 return variables[reducedRow[0].value].toString();
             } else {
                 errors += `At row ${i+1} Usage: [varName] [+*/-]= [arg1 [operation [arg2]]]`;
@@ -111,6 +112,7 @@ export const handleInput = input => (dispatch, getState) => {
         output.push('');
         return;
     });
+
     if (errors) dispatch(handleError(errors));
     dispatch(updateOutput(output.join('\n')));
 };

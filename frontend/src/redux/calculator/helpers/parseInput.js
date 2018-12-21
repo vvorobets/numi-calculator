@@ -2,9 +2,10 @@ import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
 export const parseInput = input => {
-    if (!input.length) return [{ type: 'error', value: 'Empty input' }];
+    if (!input) return [{ type: 'error', value: 'Empty input' }];
+    if (!isNaN(+input)) return [{ type: 'numberValue', value: input }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
-    if (input.length > 1 && input.startsWith('//')) { console.log('line comment'); return [{ type: 'comment', value: input }];}
+    if (input.length > 1 && input.startsWith('//')) return [{ type: 'comment', value: input }];
 
     let currentCharType = '', currentUnit = '', parsedExpression = [];
 

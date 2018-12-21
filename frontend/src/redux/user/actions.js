@@ -46,7 +46,6 @@ export const userLogin = (user) => dispatch => {
     })
         .then(response => response.json())
         .then(json => {
-console.log('login json', json);
             if (json.type === 'error') {
                 dispatch({ 
                     type: USER.LOGIN_ERROR,
