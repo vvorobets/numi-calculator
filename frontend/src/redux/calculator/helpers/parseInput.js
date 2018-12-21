@@ -2,7 +2,6 @@ import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
 export const parseInput = input => {
-console.log('input', input);
     if (!input.length) return [{ type: 'error', value: 'Empty input' }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
     if (input.length > 1 && input.startsWith('//')) { console.log('line comment'); return [{ type: 'comment', value: input }];}
@@ -194,7 +193,6 @@ console.log('input', input);
         if (currentCharType === 'comment') parsedExpression.push({ type: 'comment', value: currentUnit });
         else parsedExpression.push(identifyUnit(currentUnit));
     };
-console.log('parsedExpression: ', parsedExpression);
     return parsedExpression;
 }
 

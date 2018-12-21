@@ -1,5 +1,3 @@
-import { handleError } from '../actions';
-
 import { parseInput } from './parseInput';
 import { FUNCTION_MAP } from './functions';
 import { CONVERSIONS_MAP } from './conversions';
@@ -9,21 +7,29 @@ import {
 import { KEYWORDS_TYPES, KEYWORDS_SUBTYPES } from './keywordsTypes';
 
 export const calculate = arr => (dispatch, getState) => { // type: array
-console.log('Calculating...', arr);
     let exchangeRates = getState().calculator.exchangeRates;
     if (!arr) return '';
     const valuesArray = arr.map(item => item.value);
 
+    // OPERATIONS PRIORITY
+    // 1. braces
+    // 2. 'Math', 'trigonometry', 'time'// func(x)
+    // 3. 'conversion'// x * yRate
+    // ?4. 'percentage'// func(x, y)
+    // 4. 'bitwise'// x ^ y
+    // 5. 'multiply', 'divide', 'modulo' // x * y
+    // 6. 'add', 'subtract' // x + y
+    // 'multiLine'// x + x... || (x + x...)/length
+
     // handle braces
     // TODO: braces multiplying, 2 (3) should return 6 
-    while (valuesArray.indexOf('(') > -1 || valuesArray.indexOf(')') > -1) {
-console.log('openBracePosition', valuesArray.indexOf('('), 'closingBracePosition', valuesArray.lastIndexOf(')'));
+    if (valuesArray.indexOf('(') > -1 || valuesArray.indexOf(')') > -1) {
         let openBracePosition = valuesArray.indexOf('(');
         if (openBracePosition > -1) {
             let closingBracePosition = valuesArray.lastIndexOf(')');
             if (closingBracePosition > -1) {
                 if (openBracePosition < closingBracePosition && ((closingBracePosition - openBracePosition) > 1)) { // calculating inside brackets, recursively if needed
-                    const innerResult = calculate(arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState);
+                    let innerResult = calculate(arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState);
                     if (innerResult) {
                         if (arr[openBracePosition - 1] && arr[openBracePosition - 1].type === 'numberValue') {
                             return calculate([
@@ -47,16 +53,42 @@ console.log('openBracePosition', valuesArray.indexOf('('), 'closingBracePosition
         return '';
     }
 
-    // OPERATIONS PRIORITY
-    // 1. braces
-    // 2. 'Math', 'trigonometry', 'time'// func(x)
-    // 3. 'conversion'// x * yRate
-    // ?4. 'percentage'// func(x, y)
-    // 4. 'bitwise'// x ^ y
-    // 5. 'multiply', 'divide', 'modulo' // x * y
-    // 6. 'add', 'subtract' // x + y
-    // 'multiLine'// x + x... || (x + x...)/length
-
+    // MATH FUNCTIONS
+    valuesArray.forEach((elem, i) => {
+        if (ONE_ARGUMENT_FUNCTIONS_LIST.includes(elem) || arr[i].value === 'fromunix') {
+            if (arr[i+1] && arr[i+1].type === 'numberValue') {
+                let innerResult = FUNCTION_MAP[arr[i].value](parseFloat(arr[i+1].value)).toString();
+                if (innerResult) {
+                    return calculate([
+                        ...arr.slice(0, i),
+                        ...parseInput(innerResult),
+                        ...arr.slice(i+2)
+                    ])(dispatch, getState);
+                }
+            }
+        } else if (TRIGONOMETRY_FUNCTIONS_LIST.includes(elem) && arr[i+1] && arr[i+1].type === 'numberValue') {
+            if(arr[i+2].value === '°') {
+                let innerResult = FUNCTION_MAP[arr[0].value](CONVERSIONS_MAP['degree']['radian'](+arr[1].value)).toString();
+                if (innerResult) {
+                    return calculate([
+                        ...arr.slice(0, i),
+                        ...parseInput(innerResult),
+                        ...arr.slice(i+3)
+                    ])(dispatch, getState);
+                }
+            } else {
+                let innerResult = FUNCTION_MAP[arr[0].value](parseFloat(arr[1].value)).toString();
+                if (innerResult) {
+                    return calculate([
+                        ...arr.slice(0, i),
+                        ...parseInput(innerResult),
+                        ...arr.slice(i+2)
+                    ])(dispatch, getState);
+                }
+            }
+        }
+        return '';
+    });
 
     // PATTERNS
     if (!arr) return '';
@@ -101,9 +133,9 @@ console.log('openBracePosition', valuesArray.indexOf('('), 'closingBracePosition
             // simple two-operands operations [arg1] [operation] [arg2]
             } else if (arr[1].type === 'operation' && arr[2].type === 'numberValue') {
                 if (arr[1].subtype === 'add' || arr[1].subtype === 'subtract' 
-                    || arr[1].subtype === 'multiply' || arr[1].subtype === 'divide') {
+                    || arr[1].subtype === 'multiply' || arr[1].subtype === 'divide' || arr[1].subtype === 'modulo') {
                     return FUNCTION_MAP[arr[1].subtype](+arr[0].value, +arr[2].value).toString();
-                } else if (arr[1].subtype === 'bitwise' || arr[1].subtype === 'modulo') {
+                } else if (arr[1].subtype === 'bitwise') {
                     return FUNCTION_MAP[arr[1].value](+arr[0].value, +arr[2].value).toString();
                 }
             }
@@ -121,11 +153,9 @@ console.log('openBracePosition', valuesArray.indexOf('('), 'closingBracePosition
 
     if (arr.length === 4) {
         // test exchangeCurrency prototype
-        let operationsToDo = arr.filter(item => item.type === 'operation');
-        if (operationsToDo.length ===1 && operationsToDo[0].subtype === 'conversion' 
-            && arr[3].subtype === 'currency') {
+        if (arr[2].subtype === 'conversion' && arr[3].subtype === 'currency') {
             let amount = 0, currencyFrom, currencyTo;
-            if (arr[0].type === 'numberValue') {
+            if (arr[0].type === 'numberValue' && arr[1].subtype === 'currency') {
                 amount = arr[0].value;
                 currencyFrom = arr[1].value;
             } else if (arr[0].value === '$' && arr[1].type === 'numberValue') {
@@ -140,41 +170,91 @@ console.log('openBracePosition', valuesArray.indexOf('('), 'closingBracePosition
             else return `${(amount * exchangeRates[currencyFrom] / exchangeRates[currencyTo]).toFixed(2)} ${currencyTo}`;
             // TODO: add cases for '$', uah, dollars, $ CAD, euro etc.
         }
+
+        if (arr[0].type === 'numberValue' && arr[1].value === '%' && (arr[2].value === 'of what is' 
+            || arr[2].value === 'on what is' || arr[2].value === 'off what is') && arr[3].type === 'numberValue') {
+            if (arr[2].value === 'of what is') return `${(arr[3].value/arr[0].value * 100).toFixed(2)}`;
+            if (arr[2].value === 'on what is') return `${(arr[3].value/(1 + arr[0].value/100)).toFixed(2)}`;
+            if (arr[2].value === 'off what is') return `${(arr[3].value/(1 - arr[0].value/100)).toFixed(2)}`;
+        }
     }
 
-    let firstOperandValue = 0, firstOperandType = '', secondOperandValue = 0, secondOperandType = '', resultValue = 0, resultMeasureUnit = '', resultType = '';
-    
-    for(let i = 0; i < arr.length; i++) {
-        if (arr[i].type === 'operation') {
-            if (ONE_ARGUMENT_FUNCTIONS_LIST.includes(arr[i].value)) { // List for Math functions with pure numbers as arguments // TODO: handle radians
-                if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState)
-                } else return '';
-            } else if (TRIGONOMETRY_FUNCTIONS_LIST.includes(arr[i].value)) {
-                if(arr[i+1] && arr[i+1].type === 'numberValue') {
-                    if(arr[i+2] && arr[i+2].value === '°') {
-                        console.error('Not implemented for now');
-                        // TODO: convert
-                        return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+3)])(dispatch, getState)
+    // BITWISE FUNCTIONS
+    valuesArray.forEach((elem, i) => {
+        if (arr[i].subtype === 'bitwise' 
+            && arr[i+1] && arr[i+1].type === 'numberValue' && arr[i-1] && arr[i-1].type === 'numberValue') {
+            let innerResult = FUNCTION_MAP[arr[1].value](+arr[i-1].value, +arr[i+1].value).toString();
+            if (innerResult) {
+                return calculate([
+                    ...arr.slice(0, i-1),
+                    ...parseInput(innerResult),
+                    ...arr.slice(i+2)
+                ])(dispatch, getState);
+            }
+        }
+        return '';
+    });
+
+    // MULTIPLY-DIVIDE-MODULO FUNCTIONS
+    valuesArray.forEach((elem, i) => {
+        if ((arr[i].subtype === 'multiply' || arr[i].subtype === 'divide' || arr[i].subtype === 'modulo') 
+            && arr[i+1] && arr[i+1].type === 'numberValue' && arr[i-1] && arr[i-1].type === 'numberValue') {
+            let innerResult =  FUNCTION_MAP[arr[i].subtype](+arr[i-1].value, +arr[i+1].value).toString();
+            if (innerResult) {
+                return calculate([
+                    ...arr.slice(0, i-1),
+                    ...parseInput(innerResult),
+                    ...arr.slice(i+2)
+                ])(dispatch, getState);
+            }
+        }
+        return '';
+    });
+
+    // ADD-SUBTRACT FUNCTIONS
+    let indexOfSimpleAdd = null;
+    valuesArray.forEach((elem, i) => {
+        if ((arr[i].subtype === 'add' || arr[i].subtype === 'subtract') && arr[i+1] && arr[i+1].type === 'numberValue') {
+            if (arr[i-1] && arr[i-1].type === 'numberValue') indexOfSimpleAdd = i;
+            else if (arr[i-2] && arr[i-2].type === 'numberValue'  && arr[i-1] && arr[i-1].type === 'measureUnit') {
+                if (arr[i+2] && arr[i+2].type === 'measureUnit' && arr[i-1].subtype  === arr[i+2].subtype 
+                    && arr[i-1].value  === arr[i+2].value) { // only identical units can be operated for now
+                    let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value).toString()} ${arr[i-1].value}`;
+                    if (innerResult) {
+                        return calculate([
+                            ...arr.slice(0, i-2),
+                            ...parseInput(innerResult),
+                            ...arr.slice(i+3)
+                        ])(dispatch, getState);
                     }
-                    return calculate([{ type: 'numberValue', value: FUNCTION_MAP[arr[i].value](arr[i+1].value) }, ...arr.slice(i+2)])(dispatch, getState);
-                } else return '';
-            } 
-            // if((arr[i+2] && arr[i+2].type === 'measureUnit') && pureScalesList.includes(arr[i+2].value)) { // TODO: make such list
-                //     firstOperandType = arr[i+2].value;
-        } else if (arr[i].type === 'numberValue') {
-            firstOperandValue = arr[i].value;
-            if (arr[i+1] && arr[i+1].type === 'operation') {
-                if (arr[i+2] && arr[i+2].type === 'numberValue') {
-                    secondOperandValue = arr[i+2].value;
-                    switch(arr[i+1].value) {
-                        case '+':
-                            resultValue = firstOperandValue + secondOperandValue; break;
-                        default:
-                            continue;
+                } else {
+                    let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value).toString()} ${arr[i-1].value}`;
+                    if (innerResult) {
+                        return calculate([
+                            ...arr.slice(0, i-2),
+                            ...parseInput(innerResult),
+                            ...arr.slice(i+2)
+                        ])(dispatch, getState);
                     }
                 }
             }
+        }
+    });
+    console.log('indexOfSimpleAdd', indexOfSimpleAdd);
+    if (indexOfSimpleAdd) {
+        let innerResult =  FUNCTION_MAP[arr[indexOfSimpleAdd].subtype](+arr[indexOfSimpleAdd-1].value, +arr[indexOfSimpleAdd+1].value);
+        if (innerResult) {
+            let arrayCopy = arr.map(item => item);
+    console.log(arr, arrayCopy, 'innerResult', innerResult, arrayCopy.splice(indexOfSimpleAdd-1, 3, innerResult), [
+        ...arr.slice(0, indexOfSimpleAdd-1),
+        parseInput(innerResult),
+        ...arr.slice(indexOfSimpleAdd+2)
+    ]);
+            return calculate([
+                ...arrayCopy.slice(0, indexOfSimpleAdd-1),
+                parseInput(innerResult),
+                ...arrayCopy.slice(indexOfSimpleAdd+2)
+            ])(dispatch, getState);
         }
     }
     return '';

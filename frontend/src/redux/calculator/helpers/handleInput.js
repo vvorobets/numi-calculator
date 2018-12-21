@@ -19,6 +19,15 @@ export const handleInput = input => (dispatch, getState) => {
     let output = [];
     input.split('\n').forEach((row, i) => {
         if (!row) { output.push(''); return; } // empty output for that row
+
+        if (output) {
+            variables['prev'] = output[i-1];
+            let outputSum = calculate(parseInput(output.filter(elem => elem.length).join('+')))(dispatch, getState);
+            if (outputSum) {
+                variables['total'] = variables['sum'] = outputSum;
+                variables['average'] = variables['avg'] = outputSum / (output.length);
+            }
+        }
         
         let parsedRow = parseInput(row), reducedRow = []; // type: array of parsed input's elements
 
@@ -61,14 +70,6 @@ export const handleInput = input => (dispatch, getState) => {
             }
         };
         // HANDLE ASSIGNING OF VARIABLES
-        if (output) {
-            variables['prev'] = output[i-1];
-            let outputSum = calculate(parseInput(output.filter(elem => elem.length).join('+')))(dispatch, getState);
-            if (outputSum) {
-                variables['total'] = variables['sum'] = outputSum;
-                variables['average'] = variables['avg'] = outputSum / (output.length);
-            }
-        }
         if (reducedRow[0] && reducedRow[0].type === KEYWORDS_TYPES.variableName 
             && reducedRow[1] && reducedRow[1].subtype === KEYWORDS_SUBTYPES.assign 
             && reducedRow.length > 2) {
