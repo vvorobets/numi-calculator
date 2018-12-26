@@ -44,7 +44,37 @@ class UserController {
     user.password = password
     user.email = email
     user.username = username
-    await user.save()
+
+    Logger.info(request.file);
+
+    const randomNumber = new Date().getTime()+Math.floor(Math.random() * 1000)
+    const profilePic = request.file('profile_pic', {
+      types: ['image'],
+      size: ['2mb'],
+      allowedExtensions: ['jpg', 'png', 'jpeg']
+    })
+
+    let name = `${profilePic._clientName}`
+
+    await profilePic.move('uploads', {
+      name: (randomNumber)+'custom-name.jpg'
+    })
+
+    if (!profilePic.moved()) {
+      return profilePic.error()
+    }
+
+    const data = request.only(['email', 'userpic'])
+    const user = await auth.getUser()
+    const fileName =  `../../uploads/${name}`
+    const validation = await validate(data, {
+      email: 'required|email|users'
+    })
+
+    user.merge({ userpic: fileName })
+    user.merge(data)
+
+    // await user.save()
 
     const logged = await this.login({ request, auth })
     return logged
