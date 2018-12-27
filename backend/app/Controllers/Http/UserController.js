@@ -3,6 +3,7 @@
 const Database = use('Database')
 const User = use('App/Models/User')
 const { validate } = use('Validator')
+const Helpers = use('Helpers')
 const Logger = use('Logger')
 
 class UserController {
@@ -20,6 +21,42 @@ class UserController {
         token: jwt.token
       }
     }
+  }
+
+  async edit ({ request, auth }) {
+
+    // try {
+    //   console.log(updatingUser = await auth.getUser())
+    // } catch (error) {
+    //   response.send('You are not logged in')
+    // }
+    console.log('edit path');
+
+    const profilePic = request.file('profile_pic', {
+      types: ['image'],
+      size: ['1mb'],
+      allowedExtensions: ['jpg', 'jpeg', 'png']
+    })
+
+    const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
+    await profilePic.move(Helpers.tmpPath('uploads'), { // or just: await profilePic.move('uploads', {
+      name: profilePicName,
+      overwrite: true
+    })
+
+    if (!profilePic.moved()) {
+      return profilePic.error()
+    }
+
+    // const data = request.only(['email', 'userpic'])
+    // const user = await auth.getUser()
+    // const validation = await validate(data, {
+    //   email: 'required|email|users'
+    // })
+
+    return 'File moved'
+    // user.merge({ profile_pic: `uploads/${profilePicName}` })
+    // user.merge(data)
   }
 
   async registration ({ request, auth, response }) {
@@ -47,34 +84,7 @@ class UserController {
 
     Logger.info(request.file);
 
-    const randomNumber = new Date().getTime()+Math.floor(Math.random() * 1000)
-    const profilePic = request.file('profile_pic', {
-      types: ['image'],
-      size: ['2mb'],
-      allowedExtensions: ['jpg', 'png', 'jpeg']
-    })
-
-    let name = `${profilePic._clientName}`
-
-    await profilePic.move('uploads', {
-      name: (randomNumber)+'custom-name.jpg'
-    })
-
-    if (!profilePic.moved()) {
-      return profilePic.error()
-    }
-
-    const data = request.only(['email', 'userpic'])
-    const user = await auth.getUser()
-    const fileName =  `../../uploads/${name}`
-    const validation = await validate(data, {
-      email: 'required|email|users'
-    })
-
-    user.merge({ userpic: fileName })
-    user.merge(data)
-
-    // await user.save()
+    await user.save()
 
     const logged = await this.login({ request, auth })
     return logged

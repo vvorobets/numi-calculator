@@ -10,6 +10,7 @@ import { getExchangeRates } from '../../redux/calculator/helpers/getExchangeRate
 // React components
 import Quickstart from './Quickstart';
 import Profile from './Profile';
+import Edit from './Edit';
 import Calculator from './calculator/Calculator';
 import Home from './Home';
 
@@ -49,6 +50,7 @@ class Dashboard extends Component {
                     <Route exact path="/quickstart" component={ Quickstart } />
                     <Route exact path="/calculator" component={ Calculator } />
                     <Route exact path="/profile" component={ Profile } />
+                    <Route exact path="/edit" component={ Edit } />
                     <Route component={ Home } />
                 </Switch>
                 </div>

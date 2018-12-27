@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { USER } from './types';
 
 export const userSignup = (user) => dispatch => {
@@ -31,6 +32,54 @@ export const userSignup = (user) => dispatch => {
                 message: error.message
             });
         });
+};
+
+export const userEdit = form_data => dispatch => {
+    dispatch({ type: USER.EDIT});
+
+    console.log('Body: ', form_data);
+
+    axios
+     .post('http://localhost:3333/edit', form_data)
+     .then((res) => {
+	    if(res.data.message) {
+            console.error(res.data.message);
+            
+            dispatch({ type: USER.EDIT_ERROR, message: res.data.message });
+	   	} else {
+               console.log('Image has been uploaded successfully');
+               dispatch({ type: USER.EDIT_SUCCESS }); // , user: json.user
+	    }
+    });
+    // return fetch('http://localhost:3333/edit', {
+    //     method: "POST",
+    //     mode: "cors",
+    //     headers: {
+    //         "Content-Type": undefined,
+            
+    //     },
+    //     body: user
+    // })
+    //     .then(response => response.json())
+    //     .then(json => { 
+    //         if (json.type === 'error') {
+    //             dispatch({ 
+    //                 type: USER.EDIT_ERROR,
+    //                 message: json.message
+    //             });
+    //         } else {
+    //             dispatch({ 
+    //                 type: USER.EDIT_SUCCESS,
+    //                 user: json.user
+    //             });
+    //         }
+    //     })            
+    //     .catch(error => {
+    //         dispatch({ 
+    //             type: USER.EDIT_ERROR,
+    //             message: error.message
+    //         });
+    //     });
 };
 
 export const userLogin = (user) => dispatch => {

@@ -17,8 +17,6 @@ class RegisterForm extends Component {
 			email: '',
 			password: '',
 			confirmPassword: '',
-			selectedFile: null,
-			dimensions: {},
             errors: {}
 		};
 
@@ -30,12 +28,6 @@ class RegisterForm extends Component {
 
 	handleChange(e) {
 		this.setState({ [e.target.name]: e.target.value });
-	}
-
-	handleSelectedFile(e) {
-		console.log(e.target.result, e.target.files[0]);
-		this.setState({ selectedFile: URL.createObjectURL(e.target.files[0]) });
-		// (event) => {this.updatePreview(event , teamLogoField)}
 	}
 
 	handleSubmit(e) {
@@ -64,22 +56,6 @@ class RegisterForm extends Component {
         };
 	}
 
-	updatePreview(event, teamLogoField) {
-		// const reader = new FileReader();
-	
-		// reader.onload = (e) => {
-		// 	$('#team-logo-img').attr('src', e.target.result);
-		//  };
-	
-		// reader.readAsDataURL(event.target.files[0]);
-		// teamLogoField.onChange(event);
-	}
-
-	onImgLoad({target:img}) {
-        this.setState({dimensions:{height:img.offsetHeight,
-                                   width:img.offsetWidth}});
-    }
-
     render() {
         if (this.props.user.username) {
             return (
@@ -93,7 +69,7 @@ class RegisterForm extends Component {
             )
         }
         
-        const { username, email, password, confirmPassword, selectedFile, dimensions } = this.state;
+        const { username, email, password, confirmPassword } = this.state;
 
 		return (
 			<form className="user-form">
@@ -138,23 +114,6 @@ class RegisterForm extends Component {
                     className="user-form__input"
 				/>
                 <p className="user-form__tip--error">{ this.state.errors.confirmPassword }</p>
-				<p>{ selectedFile ? `Profile picture You've picked: ${selectedFile.name}, dimensions: width ${dimensions.width}, height ${dimensions.height}` : 'Pick your avatar picture' }</p>
-				<img src={this.state.selectedFile} onLoad={this.onImgLoad}/>
-				<input
-					style={{ display: 'none' }}
-					type="file"
-					accept="image/png, image/jpeg, image/jpg"
-					name="profilePic"
-					// value={ selectedFile }
-					placeholder="Upload avatar"
-					onChange={this.handleSelectedFile}
-					ref={ fileInput => this.fileInput = fileInput }
-					autoComplete="off"
-					className="user-form__input"
-					required
-				/>
-				<button onClick={() => this.fileInput.click()}>Pick File</button>
-                <p className="user-form__tip--error">{ this.state.errors.selectedFile }</p>
 				<button onClick={this.handleSubmit} className="user-form__submit-button">Sign Up</button>
                 <p className="user-form__tip--error">{ this.props.user.signupErrorMessage }</p>
 				<span>Already Registered? </span><Link to="login"> Back to login </Link>
