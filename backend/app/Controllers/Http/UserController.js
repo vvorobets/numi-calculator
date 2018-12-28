@@ -23,37 +23,6 @@ class UserController {
     }
   }
 
-  async edit ({ request, response, auth }) {
-    try {
-      const user = await auth.getUser()
-
-      const profilePic = request.file('profile_pic', {
-        types: ['image'],
-        size: ['1mb'],
-        allowedExtensions: ['jpg', 'jpeg', 'png']
-      })
-  
-      const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
-  
-      await profilePic.move(Helpers.tmpPath('uploads'), {
-        name: profilePicName,
-        overwrite: true
-      })
-  
-      if (!profilePic.moved()) {
-        return profilePic.error()
-      }
-
-      const picFolderPath = 'tmp/uploads'
-  
-      user.merge({ profile_pic: `${picFolderPath}/${profilePicName}` })
-      return user
-  
-    } catch (error) {
-      response.send('You are not logged in')
-    }
-  }
-
   async registration ({ request, auth, response }) {
     const { email, password, username } = request.all();
     Logger.info('auth', email);
@@ -93,6 +62,72 @@ class UserController {
 
     return response.status(200).json({ message : 'Logout success'})
   }
+
+  async edit ({ request, response, auth }) {
+    try {
+      const user = await auth.getUser()
+
+      const profilePic = request.file('profile_pic', {
+        types: ['image'],
+        size: ['1mb'],
+        allowedExtensions: ['jpg', 'jpeg', 'png']
+      })
+  
+      const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
+  
+      await profilePic.move(Helpers.tmpPath('uploads'), {
+        name: profilePicName,
+        overwrite: true
+      })
+  
+      if (!profilePic.moved()) {
+        return profilePic.error()
+      }
+
+      const picFolderPath = 'tmp/uploads'
+  
+      // user.merge({ profile_pic: `${picFolderPath}/${profilePicName}` })
+      return user
+  
+    } catch (error) {
+      response.send('You are not logged in')
+    }
+  }
+
+  async saveNote ({ request, response, auth }) {
+    // try {
+      const user = await auth.getUser()
+
+      console.log("Notes: ", user.notes)
+
+      if (user.notes) {
+        user.notes = { 'a': 4 }
+        console.log("Are notes: ", user.notes, 'b: ')
+        // let b = Object.assign({}, JSON.parse(user.notes), request.post())
+      } else user.notes = JSON.stringify(Object.assign({}, request.post())) // user.notes = JSON.parse(request.post())
+      console.log("Now notes: ", user.notes)
+      
+      await user.save()
+      return user
+  
+    // } catch (error) {
+    //   response.send('You are not logged in')
+    // }
+  }
+
+  async getNotes ({ request, response, auth }) {
+    try {
+      const user = await auth.getUser()
+
+      console.log('Getting notes...')
+      return user
+  
+    } catch (error) {
+      response.send('You are not logged in')
+    }
+  }
+
+
 }
 
 module.exports = UserController

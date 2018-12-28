@@ -27,9 +27,18 @@ Route
   .middleware('guest')
 
 Route
+  .get('logout', 'UserController.logout')
+  .middleware('guest')
+
+Route
   .post('edit', 'UserController.edit')
   .middleware(['auth'])
 
-  Route
-  .get('logout', 'UserController.logout')
-  .middleware('guest')
+Route
+  .post('notes', 'UserController.saveNote')
+  .middleware(['auth'])
+
+Route
+  .get('notes', 'UserController.getNotes')
+  .middleware(['auth'])
+

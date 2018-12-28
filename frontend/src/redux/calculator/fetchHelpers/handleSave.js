@@ -1,27 +1,28 @@
 import axios from 'axios';
-import { updateInput, updateOutput, saveNote } from '../actions';
+import { updateInput, updateOutput, saveNote, saveNoteError, saveNoteSuccess } from '../actions';
 
 export const handleSave = note => (dispatch, getState) => {
+    dispatch(saveNote());
 
     console.log('Saving...', note);
 
-    // axios({
-    //     method: 'POST',
-    //     url: 'http://localhost:3333/notes',
-    //     data: form_data,
-    //     headers: {
-    //         'Authorization': `Bearer ${getState().user.token}`,
-    //         'Content-Type': 'application/json'
-    //     }
-    // }).then((res) => {
-	//     if(res.data.message) {
-    //         console.error(res.data.message);
+    axios({
+        method: 'POST',
+        url: 'http://localhost:3333/notes',
+        data: JSON.stringify(note),
+        headers: {
+            'Authorization': `Bearer ${getState().user.token}`,
+            'Content-Type': 'application/json; charset=utf-8'
+        }
+    }).then((res) => {
+	    if(res.data.message) {
+            console.error(res.data.message);
             
-    //         dispatch({ type: USER.EDIT_ERROR, message: res.data.message });
-	//    	} else {
-    //         console.log('Image has been uploaded successfully');
-    //         dispatch({ type: USER.EDIT_SUCCESS }); // , user: json.user
-	//     }
-    // });
+            dispatch(saveNoteError(res.data.message));
+	   	} else {
+            console.log('Saved!!!');
+            dispatch(saveNoteSuccess()); // , user: json.user
+	    }
+    });
 
 }

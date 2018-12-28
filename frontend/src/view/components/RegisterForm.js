@@ -21,9 +21,7 @@ class RegisterForm extends Component {
 		};
 
 		this.handleChange = this.handleChange.bind(this);
-		this.handleSelectedFile = this.handleSelectedFile.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
-		this.onImgLoad = this.onImgLoad.bind(this);
 	}
 
 	handleChange(e) {
