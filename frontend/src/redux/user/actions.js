@@ -34,21 +34,27 @@ export const userSignup = (user) => dispatch => {
         });
 };
 
-export const userEdit = form_data => dispatch => {
+export const userEdit = form_data => (dispatch, getState) => {
     dispatch({ type: USER.EDIT});
 
     console.log('Body: ', form_data);
 
-    axios
-     .post('http://localhost:3333/edit', form_data)
-     .then((res) => {
+    axios({
+        method: 'POST',
+        url: 'http://localhost:3333/edit',
+        data: form_data,
+        headers: {
+            'Authorization': `Bearer ${getState().user.token}`,
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }).then((res) => {
 	    if(res.data.message) {
             console.error(res.data.message);
             
             dispatch({ type: USER.EDIT_ERROR, message: res.data.message });
 	   	} else {
-               console.log('Image has been uploaded successfully');
-               dispatch({ type: USER.EDIT_SUCCESS }); // , user: json.user
+            console.log('Image has been uploaded successfully');
+            dispatch({ type: USER.EDIT_SUCCESS }); // , user: json.user
 	    }
     });
     // return fetch('http://localhost:3333/edit', {

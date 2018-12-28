@@ -28,7 +28,7 @@ Route
 
 Route
   .post('edit', 'UserController.edit')
-  .middleware('guest')
+  .middleware(['auth'])
 
   Route
   .get('logout', 'UserController.logout')

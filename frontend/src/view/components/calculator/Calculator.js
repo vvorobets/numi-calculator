@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
-import { refresh, handleError } from '../../../redux/calculator/actions';
+import { refresh, handleError, saveNote } from '../../../redux/calculator/actions';
 import { handleInput } from '../../../redux/calculator/helpers/handleInput';
+import { handleSave } from '../../../redux/calculator/fetchHelpers/handleSave';
 
 const Calculator = (props) => {
 
@@ -32,12 +33,16 @@ const Calculator = (props) => {
     const copyOne = e => {
         navigator.clipboard.writeText(e.target.innerHTML);
         alert (`Copied: ${e.target.innerHTML}`);
-
     }
 
     const backlight = props.calculator.output.split('\n').map((item, i) => {
         return <div key={i} className="calculator__textarea-backlight-item" onClick={copyOne}>{ item }</div>
     })
+
+    const getNoteName = e => {
+        e.preventDefault();
+        props.handleSave({ [e.target.noteName.value]: props.calculator.input })
+    }
     
     return (
         <>
@@ -66,10 +71,31 @@ const Calculator = (props) => {
             <p>TOTAL: </p>
             <p className="user-form__tip--error">{ props.calculator.errorMessage }</p>
         </div>
-        <button 
-            className="operation-item__button operation-item__button--refresh"
-            onClick={ props.refresh }
-        >Clear All</button>
+        <div className="calculator__controls">
+            <form 
+                onSubmit={ getNoteName }
+                className="small-form"
+            >
+                Save as:
+                <input 
+                    type="text" name="noteName"
+                    className="small-form__input"
+                />
+                <input 
+                    type="submit" value="Save" 
+                    className="small-form__button"
+                />
+            </form> 
+            <select 
+                className="calculator__select"
+            >
+                <option>Paste</option>
+            </select>
+            <button 
+                className="calculator__button calculator__button--refresh"
+                onClick={ props.refresh }
+            >Clear All</button>
+        </div>
         </>
     )
 }
@@ -94,7 +120,7 @@ const mapStateToProps = ({ user, calculator }) => ({
 
 const CalculatorConnected = connect(
     mapStateToProps,
-    { handleInput, handleError, refresh }
+    { handleInput, refresh, handleError, handleSave }
 )(Calculator);
 
 export default CalculatorConnected;

@@ -23,40 +23,35 @@ class UserController {
     }
   }
 
-  async edit ({ request, auth }) {
+  async edit ({ request, response, auth }) {
+    try {
+      const user = await auth.getUser()
 
-    // try {
-    //   console.log(updatingUser = await auth.getUser())
-    // } catch (error) {
-    //   response.send('You are not logged in')
-    // }
-    console.log('edit path');
+      const profilePic = request.file('profile_pic', {
+        types: ['image'],
+        size: ['1mb'],
+        allowedExtensions: ['jpg', 'jpeg', 'png']
+      })
+  
+      const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
+  
+      await profilePic.move(Helpers.tmpPath('uploads'), {
+        name: profilePicName,
+        overwrite: true
+      })
+  
+      if (!profilePic.moved()) {
+        return profilePic.error()
+      }
 
-    const profilePic = request.file('profile_pic', {
-      types: ['image'],
-      size: ['1mb'],
-      allowedExtensions: ['jpg', 'jpeg', 'png']
-    })
-
-    const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
-    await profilePic.move(Helpers.tmpPath('uploads'), { // or just: await profilePic.move('uploads', {
-      name: profilePicName,
-      overwrite: true
-    })
-
-    if (!profilePic.moved()) {
-      return profilePic.error()
+      const picFolderPath = 'tmp/uploads'
+  
+      user.merge({ profile_pic: `${picFolderPath}/${profilePicName}` })
+      return user
+  
+    } catch (error) {
+      response.send('You are not logged in')
     }
-
-    // const data = request.only(['email', 'userpic'])
-    // const user = await auth.getUser()
-    // const validation = await validate(data, {
-    //   email: 'required|email|users'
-    // })
-
-    return 'File moved'
-    // user.merge({ profile_pic: `uploads/${profilePicName}` })
-    // user.merge(data)
   }
 
   async registration ({ request, auth, response }) {
