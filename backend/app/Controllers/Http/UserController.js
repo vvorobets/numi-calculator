@@ -19,7 +19,7 @@ class UserController {
     const jwt = await auth.attempt(username, password)
 
     const userData = await Database.table('users').where('username', username)
-    const userNotes = await Database.table('notes').where('user_id', user.id)
+    const userNotes = await Database.table('notes').where('user_id', userData[0].id)
 
     return {
       user: {
@@ -27,7 +27,7 @@ class UserController {
         email: userData[0].email,
         userpic: userData[0].userpic,
         token: jwt.token,
-        notes: userNotes
+        savedNotes: userNotes
       }
     }
   }
@@ -122,7 +122,7 @@ class UserController {
       }
 
       const userNotes = await Database.table('notes').where('user_id', user.id)
-      return { notes: userNotes }
+      return { savedNotes: userNotes }
 
     } catch (error) {
       response.send('You are not logged in')
@@ -134,7 +134,7 @@ class UserController {
       const user = await auth.getUser()
       const userNotes = await Database.table('notes').where('user_id', user.id)
   
-      return { notes: userNotes }
+      return { savedNotes: userNotes }
     } catch (error) {
       response.send('You are not logged in')
     }

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { refresh, handleError, saveNote } from '../../../redux/calculator/actions';
 import { handleInput } from '../../../redux/calculator/helpers/handleInput';
-import { handleSave } from '../../../redux/calculator/fetchHelpers/handleSave';
+import { handleSave } from '../../../redux/user/fetchHelpers/handleSave';
 
 const Calculator = (props) => {
 
@@ -41,8 +41,23 @@ const Calculator = (props) => {
 
     const getNoteName = e => {
         e.preventDefault();
-        props.handleSave({ [e.target.noteName.value]: props.calculator.input })
+        props.handleSave({ [e.target.noteName.value]: props.calculator.input });
+        e.target.noteName.value = '';
     }
+
+    const pasteNote = e => {
+        if (!e.target.value || e.target.value === "Paste") return; // label is needed instead of "Paste"
+        let presentInput = props.calculator.input;
+        if (presentInput.length > 1 && presentInput.charAt(presentInput.length-1) !== '\n') {
+            presentInput = presentInput.concat('\n');
+        }
+        props.handleInput(presentInput.concat(e.target.value));
+        e.target.value = 'Paste'; // or "" - to nullify previous choice
+    }
+
+    const savedNotes = props.user.savedNotes.map(item => {
+        return <option key={item.id} value={item.noteBody}>{ item.noteName }</option>
+    })
     
     return (
         <>
@@ -87,9 +102,12 @@ const Calculator = (props) => {
                 />
             </form> 
             <select 
+                // value="Paste"
+                onChange={ pasteNote }
                 className="calculator__select"
             >
                 <option>Paste</option>
+                { savedNotes }
             </select>
             <button 
                 className="calculator__button calculator__button--refresh"
@@ -102,7 +120,15 @@ const Calculator = (props) => {
 
 Calculator.propTypes = {
     user: PropTypes.shape({
-        username: PropTypes.string
+        username: PropTypes.string,
+        savedNotes: PropTypes.arrayOf(PropTypes.shape({
+            id: PropTypes.number,
+            user_id: PropTypes.number,
+            noteBody: PropTypes.string,
+            created_at: PropTypes.string,
+            updated_at: PropTypes.string,
+            noteName: PropTypes.string
+        })),
     }),
 	calculator: PropTypes.shape({
         input: PropTypes.string,

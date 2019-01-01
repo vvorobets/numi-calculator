@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { updateInput, updateOutput, saveNote, saveNoteError, saveNoteSuccess } from '../actions';
+import { saveNote, saveNoteError, saveNoteSuccess } from '../actions';
 
 export const handleSave = note => (dispatch, getState) => {
     dispatch(saveNote());
@@ -21,7 +21,7 @@ export const handleSave = note => (dispatch, getState) => {
             dispatch(saveNoteError(res.data.message));
 	   	} else {
             console.log('Saved!!!');
-            dispatch(saveNoteSuccess()); // , user: json.user
+            dispatch(saveNoteSuccess(res.data)); // , user: json.user
 	    }
     });
 
