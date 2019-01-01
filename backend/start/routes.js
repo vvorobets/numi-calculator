@@ -35,6 +35,9 @@ Route
   .middleware(['auth'])
 
 Route
+  .get('tmp/uploads/:userpicName', 'UserController.getUserPic')
+
+Route
   .post('notes', 'UserController.saveNote')
   .middleware(['auth'])
 

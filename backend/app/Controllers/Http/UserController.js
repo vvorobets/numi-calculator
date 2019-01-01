@@ -2,10 +2,16 @@
 
 const Database = use('Database')
 const User = use('App/Models/User')
+const Note = use('App/Models/Note')
 const { validate } = use('Validator')
 const Helpers = use('Helpers')
 const Logger = use('Logger')
 
+const fs = use('fs')
+const readFile = Helpers.promisify(fs.readFile)
+
+const userPicPath = 'tmp/uploads/'
+  
 class UserController {
 
   async login ({ request, auth }) {
@@ -13,12 +19,15 @@ class UserController {
     const jwt = await auth.attempt(username, password)
 
     const userData = await Database.table('users').where('username', username)
+    const userNotes = await Database.table('notes').where('user_id', user.id)
 
     return {
       user: {
         username: userData[0].username,
         email: userData[0].email,
-        token: jwt.token
+        userpic: userData[0].userpic,
+        token: jwt.token,
+        notes: userNotes
       }
     }
   }
@@ -54,7 +63,7 @@ class UserController {
     return logged
   }
 
-  async logout({ request, response, auth }) { 
+  async logout({ response, auth }) { 
 
     await auth
       .authenticator('jwt')
@@ -73,7 +82,7 @@ class UserController {
         allowedExtensions: ['jpg', 'jpeg', 'png']
       })
   
-      const profilePicName = `profilePic_${request.all().username}${new Date().getTime()}.${profilePic.subtype}`;
+      const profilePicName = `profilePic_${user.username}${new Date().getTime()}.${profilePic.subtype}`;
   
       await profilePic.move(Helpers.tmpPath('uploads'), {
         name: profilePicName,
@@ -84,10 +93,9 @@ class UserController {
         return profilePic.error()
       }
 
-      const picFolderPath = 'tmp/uploads'
-  
-      // user.merge({ profile_pic: `${picFolderPath}/${profilePicName}` })
-      return user
+      user.userpic = profilePicName
+      await user.save()
+      return { userpic: profilePicName }
   
     } catch (error) {
       response.send('You are not logged in')
@@ -95,39 +103,46 @@ class UserController {
   }
 
   async saveNote ({ request, response, auth }) {
-    // try {
-      const user = await auth.getUser()
-
-      console.log("Notes: ", user.notes)
-
-      if (user.notes) {
-        user.notes = { 'a': 4 }
-        console.log("Are notes: ", user.notes, 'b: ')
-        // let b = Object.assign({}, JSON.parse(user.notes), request.post())
-      } else user.notes = JSON.stringify(Object.assign({}, request.post())) // user.notes = JSON.parse(request.post())
-      console.log("Now notes: ", user.notes)
-      
-      await user.save()
-      return user
-  
-    // } catch (error) {
-    //   response.send('You are not logged in')
-    // }
-  }
-
-  async getNotes ({ request, response, auth }) {
     try {
       const user = await auth.getUser()
+      const noteName = Object.keys(request.post())[0]
+      const noteBody = Object.values(request.post())[0]
 
-      console.log('Getting notes...')
-      return user
-  
+      const affectedRows = await Database.table('notes')
+        .where('user_id', user.id).where('noteName', noteName)
+        .update({ noteBody: noteBody })
+
+      if (!affectedRows) {
+        const note = new Note()
+        note.user_id = user.id
+        note.noteName = noteName
+        note.noteBody = noteBody
+    
+        await note.save()
+      }
+
+      const userNotes = await Database.table('notes').where('user_id', user.id)
+      return { notes: userNotes }
+
     } catch (error) {
       response.send('You are not logged in')
     }
   }
 
+  async getNotes ({ response, auth }) {
+    try {
+      const user = await auth.getUser()
+      const userNotes = await Database.table('notes').where('user_id', user.id)
+  
+      return { notes: userNotes }
+    } catch (error) {
+      response.send('You are not logged in')
+    }
+  }
 
+  async getUserPic ({ request }) {
+    return await readFile(`${userPicPath}${request.params.userpicName}`)
+  }
 }
 
 module.exports = UserController

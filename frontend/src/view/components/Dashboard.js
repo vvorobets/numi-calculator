@@ -10,9 +10,11 @@ import { getExchangeRates } from '../../redux/calculator/helpers/getExchangeRate
 // React components
 import Quickstart from './Quickstart';
 import Profile from './Profile';
-import Edit from './Edit';
+import EditUserPic from './EditUserPic';
 import Calculator from './calculator/Calculator';
 import Home from './Home';
+
+const userpicPath = `http://localhost:3333/tmp/uploads/`;
 
 class Dashboard extends Component {
     constructor(props) {
@@ -45,12 +47,14 @@ class Dashboard extends Component {
                     <button onClick={this.handleLogout} className="user-form__submit-button user-form__submit-button--logout">Log Out</button>
                 </div>
                 <div className="app-container__main-section">
-                    <h3 className="app-container__header">Welcome, {this.props.user.username}!</h3><br />
+                    <h3 className="app-container__header">Welcome, {this.props.user.username}!
+                        <img src={`${userpicPath}${this.props.user.userpic}`} alt="userpic" />
+                    </h3><br />
                 <Switch>
                     <Route exact path="/quickstart" component={ Quickstart } />
                     <Route exact path="/calculator" component={ Calculator } />
                     <Route exact path="/profile" component={ Profile } />
-                    <Route exact path="/edit" component={ Edit } />
+                    <Route exact path="/edit_user_pic" component={ EditUserPic } />
                     <Route component={ Home } />
                 </Switch>
                 </div>
@@ -61,7 +65,8 @@ class Dashboard extends Component {
 
 Dashboard.propTypes = {
 	user: PropTypes.shape({
-        username: PropTypes.string
+        username: PropTypes.string,
+        userpic: PropTypes.string
     }),
     userLogout: PropTypes.func,
     getExchangeRates: PropTypes.func

@@ -37,8 +37,6 @@ export const userSignup = (user) => dispatch => {
 export const userEdit = form_data => (dispatch, getState) => {
     dispatch({ type: USER.EDIT});
 
-    console.log('Body: ', form_data);
-
     axios({
         method: 'POST',
         url: 'http://localhost:3333/edit',
@@ -48,13 +46,13 @@ export const userEdit = form_data => (dispatch, getState) => {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     }).then((res) => {
+console.log('Edit res: ', res);
 	    if(res.data.message) {
             console.error(res.data.message);
-            
-            dispatch({ type: USER.EDIT_ERROR, message: res.data.message });
+            dispatch({ type: USER.EDIT_ERROR, payload: { message: res.data.message }});
 	   	} else {
             console.log('Image has been uploaded successfully');
-            dispatch({ type: USER.EDIT_SUCCESS }); // , user: json.user
+            dispatch({ type: USER.EDIT_SUCCESS, payload: res.data });
 	    }
     });
     // return fetch('http://localhost:3333/edit', {
