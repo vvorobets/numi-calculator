@@ -1,7 +1,30 @@
-'use strict'
+// 'use strict'
 
-const { test } = use('Test/Suite')('Note')
+// const { test, trait } = use('Test/Suite')('Note')
+// const User = use('App/Models/User')
+// const Note = use('App/Models/Note')
 
-test('make sure 2 + 2 is 4', async ({ assert }) => {
-  assert.equal(2 + 2, 4)
-})
+// trait('Test/ApiClient')
+// trait('Auth/Client')
+// trait('Session/Client')
+
+// test('get list of notes', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   await Note.create({
+//     noteName: 'Adonis 101',
+//     noteBody: 'Testing note content',
+//     user_id: 2
+//   })
+
+//   const user = await User.find(2)
+
+//   const response = await client.get('notes').loginVia(user).end()
+
+//   response.assertStatus(200)
+//   response.assertJSONSubset({ savedNotes: [{ 
+//     noteName: "Adonis 101", 
+//     noteBody: "Testing note content", 
+//     user_id: 2 
+//   }]})
+// })

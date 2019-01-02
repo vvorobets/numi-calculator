@@ -34,12 +34,12 @@ class UserController {
 
   async registration ({ request, auth, response }) {
     const { email, password, username } = request.all();
-    Logger.info('auth', email);
-    Logger.info('auth', password);
-    Logger.info('auth', username);
+    // Logger.info('auth', email);
+    // Logger.info('auth', password);
+    // Logger.info('auth', username);
     const rules = {
       email: 'required|email|unique:users,email',
-      username: 'required|string|unique:users,username',
+      username: 'required|unique:users,username',
       password: 'required'
     }
 
