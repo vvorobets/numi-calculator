@@ -20,9 +20,10 @@ export const handleInput = input => (dispatch, getState) => {
     input.split('\n').forEach((row, i) => {
         if (!row) { output.push(''); return; } // empty output for that row
 
-        if (output) {
-            variables['prev'] = output[i-1];
-            let outputSum = calculate(reduceParsedInput(parseInput(output.filter(elem => elem.length).join('+'))))(dispatch, getState);
+        if (output.length) {
+            if (i > 0) variables['prev'] = output[i-1];
+            let stringifiedOutput = output.filter(elem => elem).join('+');
+            let outputSum = calculate(reduceParsedInput(parseInput(stringifiedOutput)))(dispatch, getState);
             if (outputSum) {
                 variables['total'] = variables['sum'] = outputSum;
                 variables['average'] = variables['avg'] = outputSum / output.length;
@@ -103,7 +104,6 @@ export const handleInput = input => (dispatch, getState) => {
             } else arrWithVariables.push(elem);
         });
         reducedRow = arrWithVariables;
-        if (i === input.split('\n').length - 1) console.log('Calculating: ', reducedRow);
         if (reducedRow) {
             let res = calculate(reducedRow)(dispatch, getState);
             output.push(res); // type: string - result value

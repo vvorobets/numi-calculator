@@ -2,6 +2,7 @@ import { MULTIWORD_KEYWORDS } from './keywordsLists';
 import { identifyUnit } from './identifyUnit';
 
 export const parseInput = input => {
+console.log('Parsing...', input);
     if (!input) return [{ type: 'error', value: 'Empty input' }];
     if (!isNaN(+input)) return [{ type: 'numberValue', value: input }];
     if (input[0] === '#') return [{ type: 'header', value: input }];
@@ -30,7 +31,7 @@ export const parseInput = input => {
                         currentUnit = '';
                     };
                     if (x !== '0') currentUnit = x;
-                    else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x') { // for non-decimal: '0b', '0o', '0x'
+                    else if (input[i+1]==='b' || input[i+1]==='o' || input[i+1]==='x' || input[i+1]==='.') { // for non-decimal: '0b', '0o', '0x' and float point
                         currentUnit = x.concat(input[i+1]);
                         i++;
                     } else { 
@@ -94,8 +95,13 @@ export const parseInput = input => {
                     i++;
                 } else {
                     if (x==='+') parsedExpression.push({ type: 'operation', subtype: 'add', value: x });
-                    else if (x==='-') parsedExpression.push({ type: 'operation', subtype: 'subtract', value: x });
-                    else if (x==='*') parsedExpression.push({ type: 'operation', subtype: 'multiply', value: x });
+                    else if (x==='-') {
+                        if (/\d/.test(input[i+1])) {// case for negative values
+                            currentUnit = x.concat(input[i+1])
+                            currentCharType = 'number'; 
+                            i++;
+                        } else parsedExpression.push({ type: 'operation', subtype: 'subtract', value: x });
+                    } else if (x==='*') parsedExpression.push({ type: 'operation', subtype: 'multiply', value: x });
                     else parsedExpression.push({ type: 'operation', subtype: 'divide', value: x });
                 }
                 break;

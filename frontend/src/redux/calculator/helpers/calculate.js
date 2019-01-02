@@ -1,16 +1,12 @@
 import { parseInput } from './parseInput';
 import { FUNCTION_MAP } from './functions';
 import { CONVERSIONS_MAP } from './conversions';
-import { 
-    ONE_ARGUMENT_FUNCTIONS_LIST, TRIGONOMETRY_FUNCTIONS_LIST
-} from './keywordsLists';
-import { KEYWORDS_TYPES, KEYWORDS_SUBTYPES } from './keywordsTypes';
 
 export const calculate = arr => (dispatch, getState) => { // type: array
 console.log('calculating: ', arr);
     let exchangeRates = getState().calculator.exchangeRates;
     if (!arr.length) return '';
-    const valuesArray = arr.map(item => item.value);
+    // const valuesArray = arr.map(item => item.value);
 
     // OPERATIONS PRIORITY
     // 1. braces
@@ -32,21 +28,19 @@ console.log('calculating: ', arr);
             bracesBalance -= 1;
             closingBracePosition = i;
         }
-console.log(arr, i, openBracePosition, closingBracePosition, bracesBalance);
-        if ((openBracePosition > -1) && (closingBracePosition > -1) && ((closingBracePosition - openBracePosition) > 1)) { // calculating inside brackets, recursively if needed
-            let innerResult = calculate(arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState);
-            if (innerResult) {
-                if (arr[openBracePosition - 1] && arr[openBracePosition - 1].type === 'numberValue') {
-                    return calculate([ ...arr.slice(0, openBracePosition), { type: 'operation', subtype: 'multiply', value: '*' }, 
-                        ...reduceParsedInput(parseInput(innerResult)), ...arr.slice(closingBracePosition+1) ])(dispatch, getState);
-                // arr.splice(openBracePosition - 1, 0, { type: 'operation', subtype: 'multiply', value: val })
-                }
-                return calculate([ ...arr.slice(0, openBracePosition), ...reduceParsedInput(parseInput(innerResult)), ...arr.slice(closingBracePosition+1) ])(dispatch, getState);
-            }
-        }
     });
     if (bracesBalance !== 0) return '';
-
+    if (openBracePosition > -1 && closingBracePosition > -1 && ((closingBracePosition - openBracePosition) > 1)) { // calculating inside brackets, recursively if needed
+        let innerResult = calculate(arr.slice(openBracePosition+1, closingBracePosition))(dispatch, getState);
+        if (innerResult) {
+            if (arr[openBracePosition - 1] && arr[openBracePosition - 1].type === 'numberValue') {
+                return calculate([ ...arr.slice(0, openBracePosition), { type: 'operation', subtype: 'multiply', value: '*' }, 
+                    ...reduceParsedInput(parseInput(innerResult)), ...arr.slice(closingBracePosition+1) ])(dispatch, getState);
+            // arr.splice(openBracePosition - 1, 0, { type: 'operation', subtype: 'multiply', value: val })
+            }
+            return calculate([ ...arr.slice(0, openBracePosition), ...reduceParsedInput(parseInput(innerResult)), ...arr.slice(closingBracePosition+1) ])(dispatch, getState);
+        }
+    }
     // MATH FUNCTIONS
     let indexOfFunc, indexOfFuncWithDegrees;
     arr.forEach((elem, i) => {
