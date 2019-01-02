@@ -1,7 +1,7 @@
 import { types } from './types';
 
 const DEFAULT_USER = { 
-    username: '', email: '', token: '', userpic: '', 
+    username: '', email: '', token: '', userpic: 'noavatar.png', 
     savedNotes: [],
     fetchingStatus: '', 
     loginErrorMessage: '', signupErrorMessage: '', editErrorMessage: '' 
@@ -14,16 +14,16 @@ const userReducer = (state = DEFAULT_USER, action) => {
         case types.EDIT:
             return { ...state, fetchingStatus: 'suspended', loginErrorMessage: '', signupErrorMessage: '', editErrorMessage: '' };
         case types.LOGIN_ERROR:
-            return { ...state, fetchingStatus: '', loginErrorMessage: action.message };
+            return { ...DEFAULT_USER, loginErrorMessage: action.message };
         case types.SIGNUP_ERROR:
-            return { ...state, fetchingStatus: '', signupErrorMessage: action.message };
+            return { ...DEFAULT_USER, signupErrorMessage: action.message };
         case types.EDIT_ERROR:
             return { ...state, fetchingStatus: '', editErrorMessage: action.payload.message };
         case types.LOGIN_SUCCESS:
-            return { username: action.user.username, email: action.user.email, token: action.user.token, userpic: action.user.userpic, 
-                savedNotes: action.user.savedNotes, fetchingStatus: '' };
+            return { ...DEFAULT_USER, username: action.user.username, email: action.user.email, token: action.user.token, 
+                userpic: action.user.userpic || 'noavatar.png', savedNotes: action.user.savedNotes };
         case types.SIGNUP_SUCCESS:
-            return { username: action.user.username, email: action.user.email, token: action.user.token, userpic: action.user.userpic, fetchingStatus: '' };
+            return { ...DEFAULT_USER, username: action.user.username, email: action.user.email, token: action.user.token };
         case types.EDIT_SUCCESS:
             return { ...state, userpic: action.payload.userpic, fetchingStatus: '' }; // username: action.user.username, token: action.user.token, 
         case types.SAVE_NOTE:

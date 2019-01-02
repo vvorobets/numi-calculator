@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 // redux
 import { connect } from 'react-redux';
-import { refresh, handleError, saveNote } from '../../../redux/calculator/actions';
+import { refresh, handleError } from '../../../redux/calculator/actions';
 import { handleInput } from '../../../redux/calculator/helpers/handleInput';
 import { handleSave } from '../../../redux/user/fetchHelpers/handleSave';
 

@@ -55,8 +55,6 @@ class UserController {
     user.email = email
     user.username = username
 
-    Logger.info(request.file);
-
     await user.save()
 
     const logged = await this.login({ request, auth })
