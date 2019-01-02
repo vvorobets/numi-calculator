@@ -72,7 +72,7 @@ class EditUserPicForm extends Component {
                     onCrop={this.onCropPreview}
                     onClose={this.onClosePreview}
                 />
-                <img src={this.state.preview} onLoad={this.onLoadPreview} alt="Preview" />
+                { this.state.preview ? <img src={this.state.preview} onLoad={this.onLoadPreview} alt="Preview" /> : ''}
 				<p className="user-form__tip--error">{ this.state.errors }</p>
 				<button onClick={this.handleSubmit} className="user-form__submit-button">Update Profile</button>
                 <p className="user-form__tip--error">{ this.props.user.editErrorMessage }</p>
