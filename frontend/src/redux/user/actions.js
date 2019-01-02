@@ -46,48 +46,22 @@ export const userEdit = form_data => (dispatch, getState) => {
             'Authorization': `Bearer ${getState().user.token}`,
             'Content-Type': 'application/x-www-form-urlencoded'
         }
-    }).then((res) => {
-console.log('Edit res: ', res);
-	    if(res.data.message) {
-            console.error(res.data.message);
-            dispatch({ type: types.EDIT_ERROR, payload: { message: res.data.message }});
-	   	} else {
+    }).then(response => { 
+console.log('response: ', response)
+        if (response.data.type === 'error') {
+            console.error(response.data);
+            dispatch({ type: types.EDIT_ERROR, payload: response.data.message });
+        } else {
             console.log('Image has been uploaded successfully');
-            dispatch({ type: types.EDIT_SUCCESS, payload: res.data });
-	    }
+            dispatch({ type: types.EDIT_SUCCESS, payload: response.data });
+        }
+    })            
+    .catch(error => {
+        dispatch({ type: types.EDIT_ERROR, payload: error.toString() });
     });
-    // return fetch('http://localhost:3333/edit', {
-    //     method: "POST",
-    //     mode: "cors",
-    //     headers: {
-    //         "Content-Type": undefined,
-            
-    //     },
-    //     body: user
-    // })
-    //     .then(response => response.json())
-    //     .then(json => { 
-    //         if (json.type === 'error') {
-    //             dispatch({ 
-    //                 type: USER.EDIT_ERROR,
-    //                 message: json.message
-    //             });
-    //         } else {
-    //             dispatch({ 
-    //                 type: USER.EDIT_SUCCESS,
-    //                 user: json.user
-    //             });
-    //         }
-    //     })            
-    //     .catch(error => {
-    //         dispatch({ 
-    //             type: USER.EDIT_ERROR,
-    //             message: error.message
-    //         });
-    //     });
 };
 
-export const userLogin = (user) => dispatch => {
+export const userLogin = user => dispatch => {
     dispatch({ type: types.LOGIN });
 
     return fetch('http://localhost:3333/login', {
@@ -159,18 +133,5 @@ export const saveNoteError = createAction(
 
 export const saveNoteSuccess = createAction(
     types.SAVE_NOTE_SUCCESS,
-);
-
-export const fetchSaved = createAction(
-    types.FETCH_SAVED,
-);
-
-export const fetchSavedError = createAction(
-    types.FETCH_SAVED_ERROR,
-);
-
-export const fetchSavedSuccess = createAction(
-    types.FETCH_SAVED_SUCCESS,
-    notes => notes
 );
 

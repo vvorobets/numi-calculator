@@ -132,3 +132,104 @@
 //   response.assertStatus(400)
 //   response.assertJSONSubset({ type: 'error', message: 'required validation failed on password' })
 // })
+
+
+
+// test('login user', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = {
+//     username: 'test1',
+//     password: '12345678',
+//   }
+
+//   const response = await client.post('login').send(data).end()
+
+//   response.assertStatus(200)
+//   response.assertJSONSubset({ user: {
+//     username: 'test1',
+//     email: 'test1@test.edu',
+//   }})
+// })
+
+
+
+// test('login user if password missed', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = {
+//     username: 'test1',
+//   }
+
+//   const response = await client.post('login').send(data).end()
+
+//   response.assertStatus(401)
+//   response.assertJSONSubset([{ field: "password", message: "Invalid user password" }])
+// })
+
+
+
+// test('login user if password missed', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = {
+//     username: 'test1',
+//     password: '1234567_',
+//   }
+
+//   const response = await client.post('login').send(data).end()
+
+//   response.assertStatus(401)
+//   response.assertJSONSubset([{ field: "password", message: "Invalid user password" }])
+// })
+
+
+
+// test('login user if username incorrect', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = {
+//     username: 'test1.else',
+//     password: '12345678',
+//   }
+
+//   const response = await client.post('login').send(data).end()
+
+//   response.assertStatus(401)
+//   response.assertJSONSubset([{ field: "username", message: "Cannot find user with provided username" }])
+// })
+
+
+// test('login user if username missed', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = {
+//     password: '12345678',
+//   }
+
+//   const response = await client.post('login').send(data).end()
+
+//   response.assertStatus(401)
+//   response.assertJSONSubset([{ field: "username", message: "Cannot find user with provided username" }])
+// })
+
+
+
+// test('logout', async ({ client, assert }) => {
+//   assert.plan(2)
+
+//   const data = { username: 'test1', password: '12345678' }
+
+//   const loginResponse = await client.post('login').send(data).end()
+//   const token = loginResponse.body.user.token;
+
+//   const logoutResponse = await client.get('logout').end()
+
+//   const response = await client.post('edit')
+//     .header('Authorization', `Bearer ${token}`)
+//     .header('Content-Type', 'application/x-www-form-urlencoded')
+//     .send('some data').end()
+
+//   logoutResponse.assertStatus(200)
+//   response.assertJSONSubset({ type: 'error', message: "You are not logged in" })
+// })

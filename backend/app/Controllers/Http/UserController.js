@@ -96,7 +96,7 @@ class UserController {
       return { userpic: profilePicName }
   
     } catch (error) {
-      response.send('You are not logged in')
+      response.json({ type: 'error', message: 'You are not logged in' }) // status(401).
     }
   }
 
@@ -122,17 +122,6 @@ class UserController {
       const userNotes = await Database.table('notes').where('user_id', user.id)
       return { savedNotes: userNotes }
 
-    } catch (error) {
-      response.send('You are not logged in')
-    }
-  }
-
-  async getNotes ({ response, auth }) {
-    try {
-      const user = await auth.getUser()
-      const userNotes = await Database.table('notes').where('user_id', user.id)
-  
-      return { savedNotes: userNotes }
     } catch (error) {
       response.send('You are not logged in')
     }
