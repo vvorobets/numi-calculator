@@ -23,6 +23,7 @@ class UserController {
 
     return {
       user: {
+        user_id: userData[0].id,
         username: userData[0].username,
         email: userData[0].email,
         userpic: userData[0].userpic,
@@ -105,6 +106,7 @@ class UserController {
       const user = await auth.getUser()
       const noteName = Object.keys(request.post())[0]
       const noteBody = Object.values(request.post())[0]
+      if (!noteName || !noteBody) response.status(400).json({ type: 'error', message: 'Empty name and (or) body field'})
 
       const affectedRows = await Database.table('notes')
         .where('user_id', user.id).where('noteName', noteName)

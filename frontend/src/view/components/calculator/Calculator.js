@@ -31,8 +31,10 @@ const Calculator = (props) => {
     }
 
     const copyOne = e => {
-        navigator.clipboard.writeText(e.target.innerHTML);
-        alert (`Copied: ${e.target.innerHTML}`);
+        if(navigator.clipboard) {
+            navigator.clipboard.writeText(e.target.innerHTML);
+            alert (`Copied: ${e.target.innerHTML}`);
+        } else alert('Unable to write to clipboard. :-(')
     }
 
     const backlight = props.calculator.output.split('\n').map((item, i) => {

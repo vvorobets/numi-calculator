@@ -7,7 +7,7 @@ class NoteSchema extends Schema {
   up () {
     this.create('notes', (table) => {
       table.increments()
-      table.integer('user_id').unsigned().references('id').inTable('users')
+      table.integer('user_id').unsigned().references('id').inTable('users') // .onDelete('CASCADE')
       table.string('noteBody', 255).notNullable()
       table.timestamps()
     })

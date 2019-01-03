@@ -41,7 +41,3 @@ Route
   .post('notes', 'UserController.saveNote')
   .middleware(['auth'])
 
-Route
-  .get('notes', 'UserController.getNotes')
-  .middleware(['auth'])
-
