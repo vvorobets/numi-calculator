@@ -51,11 +51,8 @@ console.log('calculating: ', arr);
             else indexOfFunc = i;
         }
     });
-console.log('indexOfFunc', indexOfFunc);
     if (indexOfFunc > -1 && arr[indexOfFunc+1]) {
-console.log('indexOfFunc', indexOfFunc, arr[indexOfFunc].value, arr[indexOfFunc+1]);
         let innerResult = FUNCTION_MAP[arr[indexOfFunc].value](+arr[indexOfFunc+1].value);
-console.log('indexOfFunc innerResult', innerResult);
         if (innerResult) return calculate([ ...arr.slice(0, indexOfFunc), ...parseInput(innerResult), ...arr.slice(indexOfFunc+2) ])(dispatch, getState);
     } else if (indexOfFuncWithDegrees > -1 && arr[indexOfFuncWithDegrees+1]) {
         let innerResult = FUNCTION_MAP[arr[indexOfFuncWithDegrees].value](CONVERSIONS_MAP['degree']['radian'](+arr[indexOfFuncWithDegrees+1].value));
@@ -151,66 +148,63 @@ console.log('indexOfFunc innerResult', innerResult);
     }
 
     // BITWISE FUNCTIONS
-    arr.forEach((elem, i) => {
+    for(let i = 0; i < arr.length; i++) {
         if (arr[i].subtype === 'bitwise' 
             && arr[i+1] && arr[i+1].type === 'numberValue' && arr[i-1] && arr[i-1].type === 'numberValue') {
-            let innerResult = FUNCTION_MAP[arr[1].value](+arr[i-1].value, +arr[i+1].value);
-            if (innerResult) {
-                return calculate([
-                    ...arr.slice(0, i-1),
-                    ...parseInput(innerResult),
-                    ...arr.slice(i+2)
-                ])(dispatch, getState);
-            }
+                let innerResult =  FUNCTION_MAP[arr[i].value](+arr[i-1].value, +arr[i+1].value);
+                if (innerResult) return calculate([ ...arr.slice(0, i-1), ...parseInput(innerResult), ...arr.slice(i+2) ])(dispatch, getState);
         }
-        return '';
-    });
+    };
 
     // MULTIPLY-DIVIDE-MODULO FUNCTIONS
-    let indexOfSimpleMul, indexOfMulWithUnit, indexOfMulWithTwoUnits;
-    arr.forEach((elem, i) => {
-        if ((arr[i].subtype === 'multiply' || arr[i].subtype === 'divide' || arr[i].subtype === 'modulo') 
-            && arr[i+1] && arr[i+1].type === 'numberValue' && arr[i-1] && arr[i-1].type === 'numberValue') {
-                indexOfSimpleMul = i;
-        }
-        return '';
-    });
-
-    if (indexOfSimpleMul > -1) {
-        let innerResult =  FUNCTION_MAP[arr[indexOfSimpleMul].subtype](+arr[indexOfSimpleMul-1].value, +arr[indexOfSimpleMul+1].value);
-        if (innerResult) return calculate([ ...arr.slice(0, indexOfSimpleMul-1), ...parseInput(innerResult), ...arr.slice(indexOfSimpleMul+2) ])(dispatch, getState);
-    }
-
-
-    // ADD-SUBTRACT FUNCTIONS
-    let indexOfSimpleAdd, indexOfAddWithUnit, indexOfAddWithTwoUnits;
-    arr.forEach((elem, i) => {
-        if ((arr[i].subtype === 'add' || arr[i].subtype === 'subtract') && arr[i+1] && arr[i+1].type === 'numberValue') {
-            if (arr[i-1] && arr[i-1].type === 'numberValue') indexOfSimpleAdd = i;
-            else if (arr[i-2] && arr[i-2].type === 'numberValue'  && arr[i-1] && arr[i-1].type === 'measureUnit') {
+    for(let i = 0; i < arr.length; i++) {
+        if ((arr[i].subtype === 'multiply' || arr[i].subtype === 'divide' || arr[i].subtype === 'modulo') && arr[i+1] && arr[i+1].type === 'numberValue') {
+            if (arr[i-1] && arr[i-1].type === 'numberValue') {
+                let innerResult =  FUNCTION_MAP[arr[i].subtype](+arr[i-1].value, +arr[i+1].value);
+console.log('simple modulo!', innerResult)
+                if (innerResult) return calculate([ ...arr.slice(0, i-1), ...parseInput(innerResult), ...arr.slice(i+2) ])(dispatch, getState);
+            } else if (arr[i-2] && arr[i-2].type === 'numberValue'  && arr[i-1] && arr[i-1].type === 'measureUnit') {
                 if (arr[i+2] && arr[i+2].type === 'measureUnit') {
                     // identical units
-                    if (arr[i-1].subtype === arr[i+2].subtype && arr[i-1].value  === arr[i+2].value) indexOfAddWithTwoUnits = i;
-                    else if (arr[i-1].subtype !== arr[i+2].subtype || arr[i-1].value !== arr[i+2].value) { 
+                    if (arr[i-1].subtype === arr[i+2].subtype && arr[i-1].value === arr[i+2].value) {
+                        let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value)}`;
+                        if (innerResult) return calculate([ ...arr.slice(0, i-2), ...parseInput(innerResult), arr[i-1], ...arr.slice(i+3) ])(dispatch, getState);
+                    } else if (arr[i-1].subtype !== arr[i+2].subtype || arr[i-1].value !== arr[i+2].value) { 
                     // TODO: implement conversion
                     return '';
                     } 
-                } else indexOfAddWithUnit = i;
+                } else {
+                    let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value)}`;
+                    if (innerResult) return calculate([ ...arr.slice(0, i-2), ...parseInput(innerResult), arr[i-1], ...arr.slice(i+2) ])(dispatch, getState);
+                }
             }
         }
-    });
+    };
 
-    let i; // operationIndex for simplicity
-    if (indexOfSimpleAdd > -1) {
-        let innerResult =  FUNCTION_MAP[arr[indexOfSimpleAdd].subtype](+arr[indexOfSimpleAdd-1].value, +arr[indexOfSimpleAdd+1].value);
-        if (innerResult) return calculate([ ...arr.slice(0, indexOfSimpleAdd-1), ...parseInput(innerResult), ...arr.slice(indexOfSimpleAdd+2) ])(dispatch, getState);
-    } else if (indexOfAddWithTwoUnits > -1) {
-        let innerResult = `${FUNCTION_MAP[arr[indexOfAddWithTwoUnits].subtype](+arr[indexOfAddWithTwoUnits-2].value, +arr[indexOfAddWithTwoUnits+1].value)}`;
-        if (innerResult) return calculate([ ...arr.slice(0, indexOfAddWithTwoUnits-2), ...parseInput(innerResult), arr[indexOfAddWithTwoUnits-1], ...arr.slice(indexOfAddWithTwoUnits+3) ])(dispatch, getState);
-    } else if (indexOfAddWithUnit > -1) {
-        let innerResult = `${FUNCTION_MAP[arr[indexOfAddWithUnit].subtype](+arr[indexOfAddWithUnit-2].value, +arr[indexOfAddWithUnit+1].value)}`;
-        if (innerResult) return calculate([ ...arr.slice(0, indexOfAddWithUnit-2), ...parseInput(innerResult), arr[indexOfAddWithUnit-1], ...arr.slice(indexOfAddWithUnit+2) ])(dispatch, getState);
-    }
+    // ADD-SUBTRACT FUNCTIONS
+    for(let i = 0; i < arr.length; i++) {
+        if ((arr[i].subtype === 'add' || arr[i].subtype === 'subtract') && arr[i+1] && arr[i+1].type === 'numberValue') {
+            if (arr[i-1] && arr[i-1].type === 'numberValue') {
+                let innerResult =  FUNCTION_MAP[arr[i].subtype](+arr[i-1].value, +arr[i+1].value);
+                if (innerResult) return calculate([ ...arr.slice(0, i-1), ...parseInput(innerResult), ...arr.slice(i+2) ])(dispatch, getState);
+            } else if (arr[i-2] && arr[i-2].type === 'numberValue'  && arr[i-1] && arr[i-1].type === 'measureUnit') {
+                if (arr[i+2] && arr[i+2].type === 'measureUnit') {
+                    // identical units
+                    if (arr[i-1].subtype === arr[i+2].subtype && arr[i-1].value  === arr[i+2].value) {
+                        let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value)}`;
+                        if (innerResult) return calculate([ ...arr.slice(0, i-2), ...parseInput(innerResult), arr[i-1], ...arr.slice(i+3) ])(dispatch, getState);
+                    } else if (arr[i-1].subtype !== arr[i+2].subtype || arr[i-1].value !== arr[i+2].value) { 
+                    // TODO: implement conversion
+                    return '';
+                    } 
+                } else {
+                    let innerResult = `${FUNCTION_MAP[arr[i].subtype](+arr[i-2].value, +arr[i+1].value)}`;
+                    if (innerResult) return calculate([ ...arr.slice(0, i-2), ...parseInput(innerResult), arr[i-1], ...arr.slice(i+2) ])(dispatch, getState);
+                }
+            }
+        }
+    };
+
     return ''; // default return
 }
 
@@ -221,8 +215,7 @@ export const reduceParsedInput = parsedInput => {
     });
 }
 
-// regExp examples
-// const pattern = {
+// regExp example patterns = {
 //     weather: /What is the weather (.*?) in (\w+)\?$/,
 //     moneyExchange: /Convert (\d+) (\w+) to (\w+)$/,
 //     save: /Save title: (.*) body: (.*)/,

@@ -22,7 +22,7 @@ export const handleInput = input => (dispatch, getState) => {
 
         if (output.length) {
             if (i > 0) variables['prev'] = output[i-1];
-            let stringifiedOutput = output.filter(elem => elem).join('+');
+            let stringifiedOutput = output.filter(elem => elem !== '').join('+');
             let outputSum = calculate(reduceParsedInput(parseInput(stringifiedOutput)))(dispatch, getState);
             if (outputSum) {
                 variables['total'] = variables['sum'] = outputSum;
@@ -76,11 +76,8 @@ export const handleInput = input => (dispatch, getState) => {
             && reducedRow.length > 2) {
             let res = calculate(reducedRow.slice(2))(dispatch, getState);
             if (res) {
-                if(reducedRow[1].value === '=') variables[reducedRow[0].value] = +res;
-                else if (reducedRow[1].value === '+=') variables[reducedRow[0].value] += parseFloat(res);
-                else if (reducedRow[1].value === '-=') variables[reducedRow[0].value] -= res;
-                else if (reducedRow[1].value === '*=') variables[reducedRow[0].value] *= res;
-                else if (reducedRow[1].value === '/=') variables[reducedRow[0].value] /= res;
+                if(reducedRow[1].value === '=') variables[reducedRow[0].value] = res;
+                else variables[reducedRow[0].value] = calculate(reduceParsedInput(parseInput(`${variables[reducedRow[0].value]}${reducedRow[1].value[0]}${res}`)))(dispatch, getState);
                 output.push(variables[reducedRow[0].value].toString()); 
                 return variables[reducedRow[0].value].toString();
             } else {
