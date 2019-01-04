@@ -77,8 +77,8 @@ class UserController {
 
       const profilePic = request.file('profile_pic', {
         types: ['image'],
-        size: ['1mb'],
-        allowedExtensions: ['jpg', 'jpeg', 'png']
+        size: '100kb',
+        extnames: ['jpg', 'jpeg', 'png']
       })
   
       const profilePicName = `profilePic_${user.username}${new Date().getTime()}.${profilePic.subtype}`;
