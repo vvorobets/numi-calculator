@@ -21,7 +21,7 @@ const USER_REGISTRATION_DATA = {
   password: '12345678',
 }
 
-test('validate extension of the uploaded userpic', async ({ client, assert }) => {
+test('validate mime type of the uploaded userpic', async ({ client, assert }) => {
   assert.plan(1)
 
   const registrationResponse = await client.post('registration').send(USER_REGISTRATION_DATA).end()
@@ -33,12 +33,30 @@ test('validate extension of the uploaded userpic', async ({ client, assert }) =>
     .attach('profile_pic', Helpers.tmpPath('test/example.txt'))
     .end()
 
-  console.log('Response: ', response)
-  response.assertJSONSubset({ message: 'Invalid file type plain or text. Only image is allowed' })
+  response.assertJSONSubset({ message: 'Invalid file extension plain. Only jpg, jpeg, png are allowed' }) 
+  // TODO: fix file extname from frontend
+  // Invalid file type plain or text. Only image is allowed
 })
 
 
 
+test('validate extension of the uploaded userpic', async ({ client, assert }) => {
+    assert.plan(1)
+  
+    const registrationResponse = await client.post('registration').send(USER_REGISTRATION_DATA).end()
+    const { token } = registrationResponse.body.user;
+  
+    const response = await client.post('edit')
+      .header('Authorization', `Bearer ${token}`)
+      .header('Content-Type', 'application/x-www-form-urlencoded')
+      .attach('profile_pic', Helpers.tmpPath('test/logo.svg'))
+      .end()
+  
+    response.assertJSONSubset({ message: 'Invalid file extension svg. Only jpg, jpeg, png are allowed' })
+  })
+  
+  
+  
 test('validate size of the uploaded userpic', async ({ client, assert }) => {
   assert.plan(1)
 

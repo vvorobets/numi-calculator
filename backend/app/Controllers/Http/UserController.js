@@ -78,8 +78,14 @@ class UserController {
       const profilePic = request.file('profile_pic', {
         types: ['image'],
         size: '100kb',
-        extnames: ['jpg', 'jpeg', 'png']
+        // extnames: ['jpg', 'jpeg', 'png']
       })
+
+      // TODO: fix file extname from frontend
+
+      if (profilePic.subtype !== 'jpg' && profilePic.subtype !== 'jpeg' && profilePic.subtype !== 'png') {
+        return response.json({ type: 'error', message: `Invalid file extension ${profilePic.subtype}. Only jpg, jpeg, png are allowed` })
+      }
   
       const profilePicName = `profilePic_${user.username}${new Date().getTime()}.${profilePic.subtype}`;
   

@@ -47,7 +47,6 @@ export const userEdit = form_data => (dispatch, getState) => {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     }).then(response => { 
-console.log('response: ', response)
         if (response.data.type === 'error') {
             console.error(response.data);
             dispatch({ type: types.EDIT_ERROR, payload: response.data.message });
