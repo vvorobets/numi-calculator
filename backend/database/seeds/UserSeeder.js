@@ -40,6 +40,8 @@ class UserSeeder {
 
       } while (affectedRows === 0)
     }
+
+    Database.close()
   }
 }
 
